@@ -1,0 +1,32 @@
+{
+  "name": "notesss",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "dbsync": "npx drizzle-kit push",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^8.0.0",
+    "@astrojs/preact": "^4.0.1",
+    "@astrojs/tailwind": "^5.1.3",
+    "@libsql/client": "^0.14.0",
+    "astro": "^4.16.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.2",
+    "preact": "^10.25.3",
+    "tailwindcss": "^3.4.16",
+    "typescript": "^5.7.2"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.30.1",
+    "tsx": "^4.19.2"
+  },
+  "overrides": {
+    "react": "npm:@preact/compat@latest",
+    "react-dom": "npm:@preact/compat@latest"
+  }
+}

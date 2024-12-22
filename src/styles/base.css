@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  @apply bg-white dark:bg-gray-950;
+
+  @media (prefers-color-scheme: dark) {
+    color-scheme: dark;
+  }
+}
+
+@layer base {
+  button {
+    @apply px-2 py-1 leading-none border border-white;
+  }
+
+  h1 {
+    font-size: 3rem;
+    line-height: 1.1;
+  }
+  h2 {
+    font-size: 2rem;
+    line-height: 1.1;
+  }
+  h3 {
+    font-size: 1.8rem;
+    line-height: 1.1;
+  }
+  h4 {
+    font-size: 1.4rem;
+    line-height: 1.1;
+  }
+
+  textarea {
+    background: transparent;
+  }
+}
+
+@layer components {
+  :where(.markdown) {
+    & > p {
+      /* white-space: pre; */
+      min-height: 1em;
+    }
+    p,
+    ul {
+      margin: 0.5rem 0;
+    }
+    & ul {
+      margin-left: 1rem;
+      list-style-type: disc;
+    }
+  }
+}

@@ -5,28 +5,30 @@ import { pipe } from "../lib/helper";
 const today = new Date().toISOString().split("T")[0];
 
 type NoteBlock = Note & {
-  blocks: MdxBlock[];
-};
-
-type MdxBlock = {
-  type: string;
-  items: MdxLine[];
+  lines: MdxLine[];
 };
 
 type MdxLine = {
   type: string;
   text: string;
-  done: boolean;
-  level: number;
+  done?: boolean;
+  level?: number;
 };
 
-export default function Home(props: { notes: NoteBlock[] }) {
+const tabs = ["home", "todos"];
+
+export default function Home(props: { notes: Note[] }) {
   const [notes, setNotes] = useState(props.notes);
-  const blocks = notes.map((n) => ({ ...n, blocks: parseMdBlocks(n.text) }));
+
+  const dateBlocks = notes.map((n) => ({
+    ...n,
+    lines: parseMdLines(n.text),
+  }));
+  const [tab, setTab] = useState(tabs[0]);
 
   const missingTodays = notes[0].date !== today;
 
-  console.log(notes, blocks);
+  console.log(notes, dateBlocks);
 
   const saveNote = (date: string, newText: string, oldText: string) => {
     const newNote = { date, text: newText };
@@ -60,30 +62,59 @@ export default function Home(props: { notes: NoteBlock[] }) {
       body: JSON.stringify(empty),
     });
   };
+
   return (
     <>
-      <header className="flex justify-between px-6">
-        <span>Notesss</span>
-        <span>x</span>
-      </header>
-      <main className="px-6">
-        <div className=" flex flex-col justify-stretch gap-6">
-          {missingTodays && (
-            <div className="x">
-              <div>{today}</div>
-              <button className=" border border-white" onClick={addToday}>
-                add todays note
-              </button>
+      <div class=" max-w-[1200px] mx-auto">
+        <header className="flex py-2 px-6 bg-slate-800">
+          <span>Notesss</span>
+          <div className="x mx-auto space-x-3">
+            {tabs.map((v) => (
+              <button onClick={() => setTab(v)}>{v}</button>
+            ))}
+          </div>
+          <span>x</span>
+        </header>
+        <main className="px-6 max-w-[70ch] mx-auto">
+          {tab === "home" && (
+            <div className="space-y-6">
+              {missingTodays && (
+                <div className="x">
+                  <div>{today}</div>
+                  <button className=" border border-white" onClick={addToday}>
+                    add todays note
+                  </button>
+                </div>
+              )}
+              {dateBlocks.map((note) => (
+                <Note key={note.date} note={note} saveNote={saveNote} />
+              ))}
             </div>
           )}
-          {blocks.map((note) => (
-            <Note key={note.date} note={note} saveNote={saveNote} />
-          ))}
-        </div>
-      </main>
+          {tab === "todos" && (
+            <div>
+              {dateBlocks.map((note) => (
+                <Todo key={note.date} note={note} />
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
     </>
   );
 }
+
+const Todo = ({ note }: { note: NoteBlock }) => {
+  // const todos = note.lines.map((bl) => bl.items).flat(); //.filter((b) => b.type === "todo");
+  // console.log(todos);
+
+  return (
+    <div>
+      <div className="x">{note.date}</div>
+      <div></div>
+    </div>
+  );
+};
 
 const Note = ({
   note,
@@ -98,6 +129,8 @@ const Note = ({
   const previewRef = useRef<HTMLDivElement>(null);
   const editRef = useRef<HTMLDivElement>(null);
 
+  const blocks = parseMdBlocks(note.lines);
+
   return (
     <div className="">
       <div className="x">{note.date}</div>
@@ -105,7 +138,7 @@ const Note = ({
         {!editing && (
           <div ref={previewRef} className="p-2">
             <div className="markdown">
-              {note.blocks.map(({ type, items }, i) => (
+              {blocks.map(({ type, items }, i) => (
                 <MarkDownBlock key={`${i}-${type}`} type={type} items={items} />
               ))}
             </div>
@@ -160,17 +193,13 @@ const Note = ({
   );
 };
 
-const parseLines = (lines: string[]) => {
-  return pipe(lines.join("<br>"), (s) => s);
-};
-
 const MarkDownBlock = ({ type, items }: { type: string; items: MdxLine[] }) => {
   switch (type) {
     case "heading":
       return (
         <>
           {items.map((it) => {
-            const Tag = `h${it.level + 1}`;
+            const Tag = `h${(it.level ?? 1) + 1}`;
             // @ts-ignore
             return <Tag>{it.text}</Tag>;
           })}
@@ -211,11 +240,19 @@ const MarkDownBlock = ({ type, items }: { type: string; items: MdxLine[] }) => {
       );
   }
 };
-const parseMdBlocks = (md: string) => {
-  const blocks: any[] = [];
-  const parsed = md.split("\n").map((l) => parseLine(l));
 
-  parsed.forEach((line, l) => {
+type MdxBlock = {
+  type: string;
+  items: MdxLine[];
+};
+
+const parseMdLines = (md: string) => {
+  return md.split("\n").map((l) => parseMdLine(l));
+};
+
+const parseMdBlocks = (lines: MdxLine[]) => {
+  const blocks: any[] = [];
+  lines.forEach((line, l) => {
     if (l === 0) {
       blocks.push({ type: line.type, items: [line] });
       return;
@@ -231,7 +268,7 @@ const parseMdBlocks = (md: string) => {
   return blocks;
 };
 
-const parseLine = (line: string) => {
+const parseMdLine = (line: string) => {
   const todo = /^-\s*\[([x ]?)\]\s*(.*)$/i;
   const istodo = line.match(todo);
   if (istodo)

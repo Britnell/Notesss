@@ -13,8 +13,6 @@ const notes = await allNotes()
 	<title>Notesss</title>
 </head>
 <body class=" bg-slate-900 text-white">
-	<div class=" max-w-[800px] mx-auto">
-		<Home notes={notes} client:load />
-	</div>
+	<Home notes={notes} client:load />
 </body>
 </html>

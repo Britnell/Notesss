@@ -1,11 +1,11 @@
 import { useRef, useState } from "preact/hooks";
 import type { Note } from "../db/schema";
-import { pipe } from "../lib/helper";
 
 const today = new Date().toISOString().split("T")[0];
 
 type NoteBlock = Note & {
   lines: MdxLine[];
+  tags: string[];
 };
 
 type MdxLine = {
@@ -19,16 +19,14 @@ const tabs = ["home", "todos"];
 
 export default function Home(props: { notes: Note[] }) {
   const [notes, setNotes] = useState(props.notes);
+  const [tab, setTab] = useState(tabs[0]);
 
   const dateBlocks = notes.map((n) => ({
     ...n,
     lines: parseMdLines(n.text),
+    tags: parseMdTags(n.text),
   }));
-  const [tab, setTab] = useState(tabs[0]);
-
   const missingTodays = notes[0].date !== today;
-
-  console.log(notes, dateBlocks);
 
   const saveNote = (date: string, newText: string, oldText: string) => {
     const newNote = { date, text: newText };
@@ -105,13 +103,20 @@ export default function Home(props: { notes: Note[] }) {
 }
 
 const Todo = ({ note }: { note: NoteBlock }) => {
-  // const todos = note.lines.map((bl) => bl.items).flat(); //.filter((b) => b.type === "todo");
-  // console.log(todos);
+  const todos = note.lines.filter((l) => l.type === "todo");
+  if (todos.length === 0) return null;
 
   return (
-    <div>
-      <div className="x">{note.date}</div>
-      <div></div>
+    <div className=" py-4">
+      <div className="x text-center">{note.date}</div>
+      <ul className="space-y-3">
+        {todos.map((item) => (
+          <li>
+            <input type="checkbox" checked={item.done} />
+            <label>{item.text}</label>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
@@ -129,7 +134,7 @@ const Note = ({
   const previewRef = useRef<HTMLDivElement>(null);
   const editRef = useRef<HTMLDivElement>(null);
 
-  const blocks = parseMdBlocks(note.lines);
+  const blocks = groupLineBlocks(note.lines);
 
   return (
     <div className="">
@@ -246,12 +251,11 @@ type MdxBlock = {
   items: MdxLine[];
 };
 
-const parseMdLines = (md: string) => {
-  return md.split("\n").map((l) => parseMdLine(l));
-};
+const parseMdLines = (md: string) => md.split("\n").map((l) => parseMdLine(l));
 
-const parseMdBlocks = (lines: MdxLine[]) => {
-  const blocks: any[] = [];
+const groupLineBlocks = (lines: MdxLine[]) => {
+  const blocks: MdxBlock[] = [];
+
   lines.forEach((line, l) => {
     if (l === 0) {
       blocks.push({ type: line.type, items: [line] });
@@ -302,3 +306,6 @@ const parseMdLine = (line: string) => {
     text: line,
   };
 };
+
+const parseMdTags = (md: string) =>
+  [...md.matchAll(/(?:^|[^\w])\#\w+/g)].map((match) => match[0].trim());

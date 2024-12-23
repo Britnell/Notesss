@@ -2,24 +2,21 @@
 import Home from '../preact/Home'
 import { allNotes  } from '../db'
 import '../styles/base.css'
-// import { auth } from '../auth-server';
+import { auth } from '../auth-server';
 
-// const session = await auth.api.getSession({
-//   headers: Astro.request.headers,
-// });
+const session = await auth.api.getSession({
+  headers: Astro.request.headers,
+});
 
-// if(!session) {
-// 	return Astro.redirect('/login')
-// }
-const id = 'session?.user.id'
-const notes = await allNotes(id)
-const user = {
-	id,
-	name: 'session?.user.name',
+if(!session) {
+	return Astro.redirect('/login')
 }
 
-console.log(user,' go');
-
+const notes = await allNotes(session?.user.id)
+const user = {
+	id: session?.user.id,
+	name: session?.user.name,
+}
 
 ---
 <!DOCTYPE html>

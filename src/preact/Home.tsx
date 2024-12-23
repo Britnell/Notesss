@@ -33,6 +33,8 @@ export default function Home(props: { notes: Note[]; user: User }) {
   const [notes, setNotes] = useState(props.notes);
   const [tab, setTab] = useState(tabs[0]);
 
+  console.log(notes);
+
   const dateBlocks = notes.map((n) => ({
     ...n,
     lines: parseMdLines(n.text),
@@ -82,6 +84,12 @@ export default function Home(props: { notes: Note[]; user: User }) {
     })
       .then((res) => {
         if (!res.ok) throw new Error("not ok");
+        return res.json();
+      })
+      .then((created) => {
+        setNotes((_notes) =>
+          _notes.map((n) => (n.date === created.date ? created : n))
+        );
       })
       .catch(() => {
         setNotes((n) => n.filter((n) => n.date !== today));

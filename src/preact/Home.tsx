@@ -33,8 +33,6 @@ export default function Home(props: { notes: Note[]; user: User }) {
   const [notes, setNotes] = useState(props.notes);
   const [tab, setTab] = useState(tabs[0]);
 
-  console.log(notes);
-
   const dateBlocks = notes.map((n) => ({
     ...n,
     lines: parseMdLines(n.text),
@@ -88,7 +86,7 @@ export default function Home(props: { notes: Note[]; user: User }) {
       })
       .then((created) => {
         setNotes((_notes) =>
-          _notes.map((n) => (n.date === created.date ? created : n))
+          _notes.map((n) => (n.date === today ? created : n))
         );
       })
       .catch(() => {
@@ -101,18 +99,18 @@ export default function Home(props: { notes: Note[]; user: User }) {
       <div class=" max-w-[1200px] mx-auto">
         <header className="flex py-2 px-6 bg-slate-800">
           <span>Notesss</span>
-          <div className="x mx-auto space-x-3">
+          <div className="mx-auto space-x-3">
             {tabs.map((v) => (
               <button onClick={() => setTab(v)}>{v}</button>
             ))}
           </div>
-          <span>x</span>
+          <a href="/logout">logout</a>
         </header>
         <main className="px-6 max-w-[70ch] mx-auto">
           {tab === "home" && (
             <div className="space-y-6">
               {missingTodays && (
-                <div className="x">
+                <div className="">
                   <div>{today}</div>
                   <button className=" border border-white" onClick={addToday}>
                     add todays note
@@ -143,7 +141,7 @@ const Todo = ({ note }: { note: NoteBlock }) => {
 
   return (
     <div className=" py-4">
-      <div className="x text-center">{note.date}</div>
+      <div className="text-center">{note.date}</div>
       <ul className="space-y-3">
         {todos.map((item) => (
           <li className="flex items-center gap-2">
@@ -200,6 +198,7 @@ const Note = ({
         {editing && (
           <div ref={editRef}>
             <textarea
+              autoFocus
               className={" w-full p-2 max-h-[50vh] "}
               value={editedMd}
               onChange={(ev) =>
@@ -247,6 +246,7 @@ const Note = ({
 };
 
 const MarkDownBlock = ({ type, items }: { type: string; items: MdxLine[] }) => {
+  // PARSE
   switch (type) {
     case "heading":
       return (

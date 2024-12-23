@@ -2,22 +2,24 @@
 import Home from '../preact/Home'
 import { allNotes  } from '../db'
 import '../styles/base.css'
-import { auth } from '../auth-server';
+// import { auth } from '../auth-server';
 
-const session = await auth.api.getSession({
-  headers: Astro.request.headers,
-});
+// const session = await auth.api.getSession({
+//   headers: Astro.request.headers,
+// });
 
-if(!session) {
-	return Astro.redirect('/login')
-}
-const id = session?.user.id
+// if(!session) {
+// 	return Astro.redirect('/login')
+// }
+const id = 'session?.user.id'
 const notes = await allNotes(id)
 const user = {
 	id,
-	name: session?.user.name,
-	// image: (session?.user.image as string) || undefined,
+	name: 'session?.user.name',
 }
+
+console.log(user,' go');
+
 
 ---
 <!DOCTYPE html>
@@ -26,7 +28,6 @@ const user = {
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Notesss</title>
-	<details>My markdown life planner app. one app to rule them all</details>
 </head>
 <body class=" bg-slate-900 text-white">
 	<Home notes={notes} user={user} client:idle />

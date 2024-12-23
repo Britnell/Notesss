@@ -271,9 +271,9 @@
     "@babel/helper-validator-identifier" "^7.25.9"
 
 "@better-auth/utils@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@better-auth/utils/-/utils-0.2.1.tgz#5dd95023e5b33fce3b1e3a86dcd43781336ffee2"
-  integrity sha512-1PgLrNJY3FZfwz8g6puKrAS/WJW3LWuNlLSFFKrzDLrn69SPBCuCXUF3tY6c1gURLX6nHARH6yx3dVy9f298cg==
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@better-auth/utils/-/utils-0.2.2.tgz#d1e5a9382aa494e62bfc4773b69da9bd32236e3f"
+  integrity sha512-YlOin3pX3sc8VPRdzCOWqz6uHKitwxm/k8p6/2I1JYI0hgMWmEqqismyvEjtOKoiSTnu1huwSq+yzcN7ehu59w==
   dependencies:
     uncrypto "^0.1.3"
 
@@ -2424,9 +2424,9 @@ fast-glob@^3.3.2:
     micromatch "^4.0.4"
 
 fastq@^1.6.0:
-  version "1.17.1"
-  resolved "https://registry.yarnpkg.com/fastq/-/fastq-1.17.1.tgz#2a523f07a4e7b1e81a42b91b8bf2254107753b47"
-  integrity sha512-sRVD3lWVIXWg6By68ZN7vho9a1pQcN/WBFaAAsDDFzlJjvoGx0P8z7V1t72grFJfJhu3YPZBuu25f7Kaw2jN1w==
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/fastq/-/fastq-1.18.0.tgz#d631d7e25faffea81887fe5ea8c9010e1b36fee0"
+  integrity sha512-QKHXPW0hD8g4UET03SdOdunzSouc9N4AuHdsX8XNcTsuz+yYFILVNIX4l9yHABMhiEI9Db0JTTIpu0wB+Y1QQw==
   dependencies:
     reusify "^1.0.4"
 

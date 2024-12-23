@@ -1,8 +1,8 @@
 ---
 import '../styles/base.css'
 
-
 ---
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -18,16 +18,20 @@ import '../styles/base.css'
 		</header>
 		<main class="my-8">
 			<p>
-				Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quas quasi tenetur culpa rem nulla, harum ducimus officia! Hic enim libero, eum quidem optio, minus eius, doloremque accusantium obcaecati nobis blanditiis?
+				redirecting... <br>
+				If you are not logged out & redirected automatically, please click here
 			</p>
 			<div class="flex ">
-				<a href="/login" 
-				class=" mx-auto mt-6 rounded-full px-4 bg-white text-slate-800 font-bold text-lg "
-				>
-				Go to App</a>
-			</div>	
+				<a href="/" class=" mx-auto mt-6 rounded-full px-4 bg-white text-slate-800 font-bold text-lg ">Finish</button>
+			</div>
 		</main>
 	</div>
-    
+    <script>
+        import("../auth-client").then((({signOut})=>{
+			signOut()
+			window.location.href = "/"
+		}))
+
+    </script>
 </body>
 </html>

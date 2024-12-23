@@ -22,7 +22,7 @@ type Habit = {
   value?: number;
 };
 
-const tabs = ["home", "todos"];
+const tabs = ["home", "todos", "cal", "links"];
 
 type User = {
   id: string;
@@ -110,12 +110,12 @@ export default function Home(props: { notes: Note[]; user: User }) {
         </div>
         <a href="/logout">logout</a>
       </header>
-      <aside className=" fixed right-0 bottom-0 top-[50px] w-18">
+      <aside className=" fixed right-0 bottom-0 top-[50px] w-18 pb-20">
         <div className=" h-full p-3 flex flex-col justify-center gap-3">
           {tabs.map((tab) => (
             <button
               className={
-                " aspect-square text-sm p-1 last:mb-20 " +
+                " aspect-square text-xs p-[2px] " +
                 (tab === currentTab ? " bg-white text-slate-800" : "")
               }
               onClick={() => setCurrentTab(tab)}
@@ -123,6 +123,7 @@ export default function Home(props: { notes: Note[]; user: User }) {
               {tab}
             </button>
           ))}
+          <button className="aspect-square text-xs p-[2px] ">+</button>
         </div>
       </aside>
       <main className="px-6 max-w-[70ch] mx-auto">
@@ -169,7 +170,7 @@ const Note = ({
   const blocks = groupLineBlocks(note.lines);
 
   return (
-    <div className=" card ">
+    <div className=" card relative ">
       <div className=" text-center">{note.date}</div>
       <div className=" bg-slate-800 p-2 ">
         {!editing && (
@@ -184,7 +185,6 @@ const Note = ({
         {editing && (
           <div ref={editRef}>
             <textarea
-              autoFocus
               className={" w-full p-2 max-h-[50vh] "}
               value={editedMd}
               onChange={(ev) =>
@@ -195,28 +195,14 @@ const Note = ({
           </div>
         )}
       </div>
-      <div className="mt-2 flex   gap-2">
-        <div className="grow flex items-center flex-wrap gap-2 my-1">
-          {note.habits.map((habit) => (
-            <div className="px-2 py-1  bg-slate-800 rounded-lg">
-              <span>{habit.name}</span>
-              <span>{habit.value}</span>
-            </div>
-          ))}
-          {note.tags.map((tag, i) => (
-            <span className=" underline" key={i + tag}>
-              {tag}
-            </span>
-          ))}
-        </div>
-
+      <div className=" absolute top-[30px] right-2">
         {!editing ? (
           <button
             onClick={() => {
               const h = previewRef.current?.getBoundingClientRect().height;
               h && setHeight(h);
-              setEditing(true);
               setEditedMd(note.text);
+              setEditing(true);
             }}
           >
             Edit
@@ -225,13 +211,7 @@ const Note = ({
           <>
             <button
               onClick={() => {
-                setEditing(false);
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => {
+                // TODO - dont save if no changes
                 saveNote(note, editedMd);
                 setEditing(false);
               }}
@@ -240,6 +220,30 @@ const Note = ({
             </button>
           </>
         )}
+      </div>
+      <div className="absolute top-[30px] -right-2 translate-x-full">
+        {editing && (
+          <button
+            onClick={() => {
+              setEditing(false);
+            }}
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+      <div className="mt-2 flex items-center flex-wrap gap-2">
+        {note.habits.map((habit) => (
+          <div className="px-2 py-1  bg-slate-800 rounded-lg">
+            <span>{habit.name}</span>
+            <span>{habit.value}</span>
+          </div>
+        ))}
+        {note.tags.map((tag, i) => (
+          <span className=" underline" key={i + tag}>
+            {tag}
+          </span>
+        ))}
       </div>
     </div>
   );

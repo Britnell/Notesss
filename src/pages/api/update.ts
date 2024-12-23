@@ -5,7 +5,7 @@ import { auth } from "../../auth-server";
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
-  const { text, date, userId } = await request.json();
+  const { text, id, userId } = await request.json();
 
   const errResp = new Response("error", {
     status: 400,
@@ -18,8 +18,7 @@ export const POST: APIRoute = async ({ request }) => {
   });
   if (!session || session?.user.id !== userId) return errResp;
 
-  const resp = await updateNote({ text, date, userId });
-  console.log(resp);
+  const resp = await updateNote({ text, userId, id });
 
   return new Response(JSON.stringify(resp), {
     status: 200,

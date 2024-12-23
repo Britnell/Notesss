@@ -43,12 +43,12 @@ export default function Home(props: { notes: Note[]; user: User }) {
   const userId = props.user.id;
   const missingTodays = notes[0]?.date !== today;
 
-  const saveNote = (date: string, newText: string, oldText: string) => {
-    const newNote = { date, text: newText, userId };
+  const saveNote = (editNote: Note, newText: string) => {
+    const newNote = { ...editNote, text: newText };
 
     // optimistic
     setNotes((_notes) =>
-      _notes.map((n) => (n.date === date ? { ...n, text: newText } : n))
+      _notes.map((n) => (n.id === editNote.id ? newNote : n))
     );
 
     fetch("/api/update", {
@@ -60,13 +60,14 @@ export default function Home(props: { notes: Note[]; user: User }) {
       })
       .catch(() => {
         setNotes((_notes) =>
-          _notes.map((n) => (n.date === date ? { ...n, text: oldText } : n))
+          _notes.map((n) => (n.id === editNote.id ? editNote : n))
         );
       });
   };
 
   const addToday = () => {
     const empty = {
+      id: 0.1,
       date: today,
       text: "",
       blocks: [],
@@ -152,7 +153,7 @@ const Note = ({
   saveNote,
 }: {
   note: NoteBlock;
-  saveNote: (date: string, newText: string, oldText: string) => void;
+  saveNote: (note: Note, newText: string) => void;
 }) => {
   const [editing, setEditing] = useState(false);
   const [editedMd, setEditedMd] = useState("");
@@ -224,7 +225,7 @@ const Note = ({
             </button>
             <button
               onClick={() => {
-                saveNote(note.date, editedMd, note.text);
+                saveNote(note, editedMd);
                 setEditing(false);
               }}
             >

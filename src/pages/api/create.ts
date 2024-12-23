@@ -19,9 +19,9 @@ export const POST: APIRoute = async ({ request }) => {
   if (!session || session?.user.id !== userId) return errResp;
 
   const resp = await createNote({ date, text, userId });
-  if (resp.length !== 1) return errResp;
+  if (!resp) return errResp;
 
-  return new Response(JSON.stringify(resp[0]), {
+  return new Response(JSON.stringify(resp), {
     status: 200,
   });
 };

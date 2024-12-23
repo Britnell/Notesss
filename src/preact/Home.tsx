@@ -27,8 +27,8 @@ const tabs = ["home", "todos"];
 type User = {
   id: string;
   name: string;
-  image: string | undefined;
 };
+
 export default function Home(props: { notes: Note[]; user: User }) {
   const [notes, setNotes] = useState(props.notes);
   const [tab, setTab] = useState(tabs[0]);
@@ -39,10 +39,12 @@ export default function Home(props: { notes: Note[]; user: User }) {
     tags: parseMdTags(n.text),
     habits: parseMdHabits(n.text),
   }));
-  const missingTodays = notes[0].date !== today;
+
+  const userId = props.user.id;
+  const missingTodays = notes[0]?.date !== today;
 
   const saveNote = (date: string, newText: string, oldText: string) => {
-    const newNote = { date, text: newText };
+    const newNote = { date, text: newText, userId };
 
     // optimistic
     setNotes((_notes) =>
@@ -64,14 +66,25 @@ export default function Home(props: { notes: Note[]; user: User }) {
   };
 
   const addToday = () => {
-    const empty = { date: today, text: "", blocks: [] };
+    const empty = {
+      date: today,
+      text: "",
+      blocks: [],
+      userId,
+    };
     // optim
     setNotes((n) => [empty, ...n]);
 
     fetch("/api/create", {
       method: "POST",
       body: JSON.stringify(empty),
-    });
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("not ok");
+      })
+      .catch(() => {
+        setNotes((n) => n.filter((n) => n.date !== today));
+      });
   };
 
   return (
@@ -339,7 +352,7 @@ const parseMdHabits = (md: string) => {
   const habits = /\B\[([A-Z][a-z]*)(\d*)\]\B/g;
   const matches = [...md.matchAll(habits)];
   return matches.map((match) => ({
-    type: "habit",
+    type: "habit" as const,
     name: match[1],
     value: parseInt(match[2]) || undefined,
   }));

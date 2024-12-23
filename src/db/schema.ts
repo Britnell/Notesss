@@ -7,6 +7,9 @@ export type Todo = InferSelectModel<typeof todos>;
 export const notes = sqliteTable("notes", {
   date: text("date").primaryKey().notNull(),
   text: text("text").notNull(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id),
 });
 
 export const todos = sqliteTable("todos", {
@@ -14,6 +17,9 @@ export const todos = sqliteTable("todos", {
   noteDate: text("noteDate").references(() => notes.date),
   done: integer("done").notNull().default(0),
   text: text("text").notNull(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id),
 });
 
 export const user = sqliteTable("user", {

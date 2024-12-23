@@ -1,12 +1,24 @@
 import type { APIRoute } from "astro";
 import { updateNote } from "../../db";
+import { auth } from "../../auth-server";
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
-  const { text, date } = await request.json();
+  const { text, date, userId } = await request.json();
 
-  const resp = await updateNote({ text, date });
+  const errResp = new Response("error", {
+    status: 400,
+  });
+
+  // todo zod check
+
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
+  if (!session || session?.user.id !== userId) return errResp;
+
+  const resp = await updateNote({ text, date, userId });
   console.log(resp);
 
   return new Response(JSON.stringify(resp), {

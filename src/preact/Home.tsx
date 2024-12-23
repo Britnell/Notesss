@@ -6,6 +6,7 @@ const today = new Date().toISOString().split("T")[0];
 type NoteBlock = Note & {
   lines: MdxLine[];
   tags: string[];
+  habits: Habit[];
 };
 
 type MdxLine = {
@@ -13,6 +14,12 @@ type MdxLine = {
   text: string;
   done?: boolean;
   level?: number;
+};
+
+type Habit = {
+  type: "habit";
+  name: string;
+  value?: number;
 };
 
 const tabs = ["home", "todos"];
@@ -25,6 +32,7 @@ export default function Home(props: { notes: Note[] }) {
     ...n,
     lines: parseMdLines(n.text),
     tags: parseMdTags(n.text),
+    habits: parseMdHabits(n.text),
   }));
   const missingTodays = notes[0].date !== today;
 
@@ -111,8 +119,8 @@ const Todo = ({ note }: { note: NoteBlock }) => {
       <div className="x text-center">{note.date}</div>
       <ul className="space-y-3">
         {todos.map((item) => (
-          <li>
-            <input type="checkbox" checked={item.done} />
+          <li className="flex items-center gap-2">
+            <input type="checkbox" checked={item.done} className="" />
             <label>{item.text}</label>
           </li>
         ))}
@@ -138,7 +146,20 @@ const Note = ({
 
   return (
     <div className="">
-      <div className="x">{note.date}</div>
+      <div className=" text-center">{note.date}</div>
+      <div className="grow flex items-center flex-wrap gap-2 my-1">
+        {note.habits.map((habit) => (
+          <div className="px-2 py-1  bg-slate-800 rounded-lg">
+            <span>{habit.name}</span>
+            <span>{habit.value}</span>
+          </div>
+        ))}
+        {note.tags.map((tag, i) => (
+          <span className=" underline" key={i + tag}>
+            {tag}
+          </span>
+        ))}
+      </div>
       <div className=" bg-slate-800 p-2 ">
         {!editing && (
           <div ref={previewRef} className="p-2">
@@ -230,7 +251,7 @@ const MarkDownBlock = ({ type, items }: { type: string; items: MdxLine[] }) => {
       return (
         <ul className=" list-none ml-1 ">
           {items.map((it, i) => (
-            <li key={i}>
+            <li key={i} className="flex items-center gap-2">
               <input type="checkbox" checked={it.done} />
               <label>{it.text}</label>
             </li>
@@ -273,6 +294,16 @@ const groupLineBlocks = (lines: MdxLine[]) => {
 };
 
 const parseMdLine = (line: string) => {
+  const heading = /^(\#{1,3})\s(.*)$/;
+  const isheading = line.match(heading);
+  if (isheading) {
+    return {
+      type: `heading`,
+      level: isheading[1].length,
+      text: isheading[2],
+    };
+  }
+
   const todo = /^-\s*\[([x ]?)\]\s*(.*)$/i;
   const istodo = line.match(todo);
   if (istodo)
@@ -290,17 +321,6 @@ const parseMdLine = (line: string) => {
       text: islist[1],
     };
 
-  const heading = /^(\#{1,3})\s/;
-  const isheading = line.match(heading);
-  if (isheading) {
-    const level = isheading[1].length;
-    return {
-      type: `heading`,
-      level: level,
-      text: line,
-    };
-  }
-
   return {
     type: "p",
     text: line,
@@ -308,4 +328,14 @@ const parseMdLine = (line: string) => {
 };
 
 const parseMdTags = (md: string) =>
-  [...md.matchAll(/(?:^|[^\w])\#\w+/g)].map((match) => match[0].trim());
+  [...md.matchAll(/\B\#\w+/g)].map((match) => match[0].trim());
+
+const parseMdHabits = (md: string) => {
+  const habits = /\B\[([A-Z][a-z]*)(\d*)\]\B/g;
+  const matches = [...md.matchAll(habits)];
+  return matches.map((match) => ({
+    type: "habit",
+    name: match[1],
+    value: parseInt(match[2]) || undefined,
+  }));
+};

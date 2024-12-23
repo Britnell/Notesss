@@ -24,7 +24,12 @@ type Habit = {
 
 const tabs = ["home", "todos"];
 
-export default function Home(props: { notes: Note[] }) {
+type User = {
+  id: string;
+  name: string;
+  image: string | undefined;
+};
+export default function Home(props: { notes: Note[]; user: User }) {
   const [notes, setNotes] = useState(props.notes);
   const [tab, setTab] = useState(tabs[0]);
 

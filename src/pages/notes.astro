@@ -2,6 +2,22 @@
 import Home from '../preact/Home'
 import { allNotes  } from '../db'
 import '../styles/base.css'
+import { auth } from '../auth-server';
+import { undefined } from 'astro:schema';
+
+const session = await auth.api.getSession({
+  headers: Astro.request.headers,
+});
+
+if(!session) {
+	return Astro.redirect('/login')
+}
+
+const user = {
+	id: session?.user.id,
+	name: session?.user.name,
+	image: session?.user.image || undefined,
+}
 
 const notes = await allNotes()
 ---
@@ -13,6 +29,6 @@ const notes = await allNotes()
 	<title>Notesss</title>
 </head>
 <body class=" bg-slate-900 text-white">
-	<Home notes={notes} client:load />
+	<Home notes={notes} user={user} client:load />
 </body>
 </html>

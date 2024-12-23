@@ -1,0 +1,25 @@
+---
+
+---
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <button id="login">Login w github</button>
+    <button id="logout">Logout</button>
+    <script>
+        const { signIn, signOut } = await import("../auth-client")
+            window.login.onclick = () => signIn.social({
+                provider: "github",
+                callbackURL: "/notes",
+            })
+    </script>
+</body>
+</html>

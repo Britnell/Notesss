@@ -110,12 +110,12 @@ export default function Home(props: { notes: Note[]; user: User }) {
         </div>
         <a href="/logout">logout</a>
       </header>
-      <aside className="relative">
-        <div className="fixed right-0 top-[40px] m-3  flex flex-col gap-3">
+      <aside className=" fixed right-0 bottom-0 top-[50px] w-18">
+        <div className=" h-full p-3 flex flex-col justify-center gap-3">
           {tabs.map((tab) => (
             <button
               className={
-                " aspect-square text-sm p-1 " +
+                " aspect-square text-sm p-1 last:mb-20 " +
                 (tab === currentTab ? " bg-white text-slate-800" : "")
               }
               onClick={() => setCurrentTab(tab)}
@@ -153,25 +153,6 @@ export default function Home(props: { notes: Note[]; user: User }) {
   );
 }
 
-const Todo = ({ note }: { note: NoteBlock }) => {
-  const todos = note.lines.filter((l) => l.type === "todo");
-  if (todos.length === 0) return null;
-
-  return (
-    <div className=" py-4">
-      <div className="text-center">{note.date}</div>
-      <ul className="space-y-3">
-        {todos.map((item) => (
-          <li className="flex items-center gap-2">
-            <input type="checkbox" checked={item.done} className="" />
-            <label>{item.text}</label>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
 const Note = ({
   note,
   saveNote,
@@ -188,21 +169,8 @@ const Note = ({
   const blocks = groupLineBlocks(note.lines);
 
   return (
-    <div className="">
+    <div className=" card ">
       <div className=" text-center">{note.date}</div>
-      <div className="grow flex items-center flex-wrap gap-2 my-1">
-        {note.habits.map((habit) => (
-          <div className="px-2 py-1  bg-slate-800 rounded-lg">
-            <span>{habit.name}</span>
-            <span>{habit.value}</span>
-          </div>
-        ))}
-        {note.tags.map((tag, i) => (
-          <span className=" underline" key={i + tag}>
-            {tag}
-          </span>
-        ))}
-      </div>
       <div className=" bg-slate-800 p-2 ">
         {!editing && (
           <div ref={previewRef} className="p-2">
@@ -227,7 +195,21 @@ const Note = ({
           </div>
         )}
       </div>
-      <div className="mt-2 flex justify-end gap-2">
+      <div className="mt-2 flex   gap-2">
+        <div className="grow flex items-center flex-wrap gap-2 my-1">
+          {note.habits.map((habit) => (
+            <div className="px-2 py-1  bg-slate-800 rounded-lg">
+              <span>{habit.name}</span>
+              <span>{habit.value}</span>
+            </div>
+          ))}
+          {note.tags.map((tag, i) => (
+            <span className=" underline" key={i + tag}>
+              {tag}
+            </span>
+          ))}
+        </div>
+
         {!editing ? (
           <button
             onClick={() => {
@@ -310,6 +292,25 @@ const MarkDownBlock = ({ type, items }: { type: string; items: MdxLine[] }) => {
         </p>
       );
   }
+};
+
+const Todo = ({ note }: { note: NoteBlock }) => {
+  const todos = note.lines.filter((l) => l.type === "todo");
+  if (todos.length === 0) return null;
+
+  return (
+    <div className=" py-4">
+      <div className="text-center">{note.date}</div>
+      <ul className="space-y-3">
+        {todos.map((item) => (
+          <li className="flex items-center gap-2">
+            <input type="checkbox" checked={item.done} className="" />
+            <label>{item.text}</label>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 };
 
 type MdxBlock = {

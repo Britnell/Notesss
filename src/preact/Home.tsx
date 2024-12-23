@@ -31,7 +31,8 @@ type User = {
 
 export default function Home(props: { notes: Note[]; user: User }) {
   const [notes, setNotes] = useState(props.notes);
-  const [tab, setTab] = useState(tabs[0]);
+  const [currentTab, setCurrentTab] = useState(tabs[0]);
+  const [search, setSearch] = useState("");
 
   const dateBlocks = notes.map((n) => ({
     ...n,
@@ -95,43 +96,60 @@ export default function Home(props: { notes: Note[]; user: User }) {
   };
 
   return (
-    <>
-      <div class=" max-w-[1200px] mx-auto">
-        <header className="flex py-2 px-6 bg-slate-800">
-          <span>Notesss</span>
-          <div className="mx-auto space-x-3">
-            {tabs.map((v) => (
-              <button onClick={() => setTab(v)}>{v}</button>
+    <div class=" max-w-[1200px] mx-auto">
+      <header className="flex py-2 px-6 bg-slate-800 justify-between">
+        <span>Notesss</span>
+        <div className=" border border-white px-2 py-1 ">
+          <span className=" pr-2">?</span>
+          <input
+            name="search"
+            className=" bg-transparent text-white"
+            value={search}
+            onChange={(e) => setSearch(e.target?.value || "")}
+          />
+        </div>
+        <a href="/logout">logout</a>
+      </header>
+      <aside className="relative">
+        <div className="fixed right-0 top-[40px] m-3  flex flex-col gap-3">
+          {tabs.map((tab) => (
+            <button
+              className={
+                " aspect-square text-sm p-1 " +
+                (tab === currentTab ? " bg-white text-slate-800" : "")
+              }
+              onClick={() => setCurrentTab(tab)}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      </aside>
+      <main className="px-6 max-w-[70ch] mx-auto">
+        {currentTab === "home" && (
+          <div className="space-y-6">
+            {missingTodays && (
+              <div className="">
+                <div>{today}</div>
+                <button className=" border border-white" onClick={addToday}>
+                  add todays note
+                </button>
+              </div>
+            )}
+            {dateBlocks.map((note) => (
+              <Note key={note.date} note={note} saveNote={saveNote} />
             ))}
           </div>
-          <a href="/logout">logout</a>
-        </header>
-        <main className="px-6 max-w-[70ch] mx-auto">
-          {tab === "home" && (
-            <div className="space-y-6">
-              {missingTodays && (
-                <div className="">
-                  <div>{today}</div>
-                  <button className=" border border-white" onClick={addToday}>
-                    add todays note
-                  </button>
-                </div>
-              )}
-              {dateBlocks.map((note) => (
-                <Note key={note.date} note={note} saveNote={saveNote} />
-              ))}
-            </div>
-          )}
-          {tab === "todos" && (
-            <div>
-              {dateBlocks.map((note) => (
-                <Todo key={note.date} note={note} />
-              ))}
-            </div>
-          )}
-        </main>
-      </div>
-    </>
+        )}
+        {currentTab === "todos" && (
+          <div>
+            {dateBlocks.map((note) => (
+              <Todo key={note.date} note={note} />
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
   );
 }
 

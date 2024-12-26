@@ -5,7 +5,6 @@ import {
   extractMdLinks,
   extractMdTags,
   MarkDownBlock,
-  MdText,
   parseMdLine,
   type MdxLine,
 } from "./MarkDown";
@@ -180,7 +179,7 @@ const NoteCard = ({
 }) => {
   return (
     <div className=" card relative ">
-      <h3 className=" text-center">{date}</h3>
+      <h3 className=" text-center text-base">{date}</h3>
       <div className=" bg-slate-800 p-2 ">{children}</div>
     </div>
   );
@@ -194,8 +193,9 @@ const Link = ({ note }: { note: NoteBlock }) => {
       <ul className="space-y-3 list-disc ml-6">
         {note.links.map((l) => (
           <li>
-            <a className="underline capitalize w-full flex " href={l.href}>
-              {l.text} : <span className=" ml-4 ..">{l.href}</span>
+            <a className="underline w-full flex " href={l.href}>
+              <span className="capitalize">{l.text}</span> : &nbsp;&nbsp;&nbsp;
+              <span className=" flex-auto text-ellipsis">{l.href}</span>
             </a>
           </li>
         ))}

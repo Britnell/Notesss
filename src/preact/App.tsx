@@ -135,9 +135,9 @@ export default function App(props: { notes: Note[]; user: User }) {
         </div>
       </aside>
 
-      <main className="px-6 max-w-[70ch] mx-auto">
+      <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-6">
         {currentTab === "notes" && (
-          <div className="space-y-6">
+          <>
             {missingTodays && (
               <div className="">
                 <div>{today}</div>
@@ -149,7 +149,7 @@ export default function App(props: { notes: Note[]; user: User }) {
             {dateBlocks.map((note) => (
               <Note key={note.date} note={note} saveNote={saveNote} />
             ))}
-          </div>
+          </>
         )}
         {currentTab === "todos" && (
           <>

@@ -40,6 +40,12 @@ body {
 
 @layer components {
   :where(.markdown) {
+    @apply text-gray-300;
+
+    & :is(b, a, i) {
+      @apply text-gray-50;
+    }
+
     & > p {
       /* white-space: pre; */
       min-height: 1em;
@@ -51,6 +57,9 @@ body {
     & ul {
       margin-left: 1rem;
       list-style-type: disc;
+    }
+    & a {
+      text-decoration: underline;
     }
   }
 }

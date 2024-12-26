@@ -1,5 +1,5 @@
 ---
-import Home from '../preact/Home'
+import App from '../preact/App'
 import { allNotes  } from '../db'
 import '../styles/base.css'
 import { auth } from '../auth-server';
@@ -24,9 +24,9 @@ const user = {
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Notesss</title>
+	<title>📒 Notesss</title>
 </head>
 <body class=" bg-slate-900 text-white min-h-screen">
-	<Home notes={notes} user={user} client:idle />
+	<App notes={notes} user={user} client:idle />
 </body>
 </html>

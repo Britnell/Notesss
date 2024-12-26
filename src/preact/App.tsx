@@ -1,5 +1,6 @@
 import { useRef, useState } from "preact/hooks";
 import type { Note } from "../db/schema";
+import { MarkDownBlock, type MdxLine } from "./MarkDown";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -9,42 +10,34 @@ type NoteBlock = Note & {
   habits: Habit[];
 };
 
-type MdxLine = {
-  type: string;
-  text: string;
-  done?: boolean;
-  level?: number;
-};
-
 type Habit = {
   type: "habit";
   name: string;
   value?: number;
 };
 
-const tabs = ["home", "todos", "cal", "links"];
+const tabs = ["notes", "todos", "links", "cal"];
 
 type User = {
   id: string;
   name: string;
 };
 
-export default function Home(props: { notes: Note[]; user: User }) {
+export default function App(props: { notes: Note[]; user: User }) {
   const [notes, setNotes] = useState(props.notes);
   const [currentTab, setCurrentTab] = useState(tabs[0]);
   const [search, setSearch] = useState("");
 
   const dateBlocks = notes.map((n) => ({
     ...n,
-    lines: parseMdLines(n.text),
-    tags: parseMdTags(n.text),
-    habits: parseMdHabits(n.text),
+    lines: n.text.split("\n").map((l) => parseMdLine(l)),
+    tags: extractMdTags(n.text),
+    habits: extractMdHabits(n.text),
   }));
-
   const userId = props.user.id;
   const missingTodays = notes[0]?.date !== today;
 
-  const saveNote = (editNote: Note, newText: string) => {
+  function saveNote(editNote: Note, newText: string) {
     const newNote = { ...editNote, text: newText };
 
     // optimistic
@@ -64,9 +57,9 @@ export default function Home(props: { notes: Note[]; user: User }) {
           _notes.map((n) => (n.id === editNote.id ? editNote : n))
         );
       });
-  };
+  }
 
-  const addToday = () => {
+  function addToday() {
     const empty = {
       id: 0.1,
       date: today,
@@ -93,7 +86,7 @@ export default function Home(props: { notes: Note[]; user: User }) {
       .catch(() => {
         setNotes((n) => n.filter((n) => n.date !== today));
       });
-  };
+  }
 
   return (
     <div class=" max-w-[1200px] mx-auto">
@@ -105,7 +98,7 @@ export default function Home(props: { notes: Note[]; user: User }) {
             name="search"
             className=" bg-transparent text-white"
             value={search}
-            onChange={(e) => setSearch(e.target?.value || "")}
+            onChange={(e) => setSearch((e.target as HTMLInputElement)?.value)}
           />
         </div>
         <a href="/logout">logout</a>
@@ -127,7 +120,7 @@ export default function Home(props: { notes: Note[]; user: User }) {
         </div>
       </aside>
       <main className="px-6 max-w-[70ch] mx-auto">
-        {currentTab === "home" && (
+        {currentTab === "notes" && (
           <div className="space-y-6">
             {missingTodays && (
               <div className="">
@@ -249,55 +242,6 @@ const Note = ({
   );
 };
 
-const MarkDownBlock = ({ type, items }: { type: string; items: MdxLine[] }) => {
-  // PARSE
-  switch (type) {
-    case "heading":
-      return (
-        <>
-          {items.map((it) => {
-            const Tag = `h${(it.level ?? 1) + 1}`;
-            // @ts-ignore
-            return <Tag>{it.text}</Tag>;
-          })}
-        </>
-      );
-    case "p":
-      return (
-        <p
-          dangerouslySetInnerHTML={{
-            __html: items.map((it) => it.text).join("<br>"),
-          }}
-        ></p>
-      );
-    case "list":
-      return (
-        <ul>
-          {items.map((it, i) => (
-            <li key={i}>{it.text}</li>
-          ))}
-        </ul>
-      );
-    case "todo":
-      return (
-        <ul className=" list-none ml-1 ">
-          {items.map((it, i) => (
-            <li key={i} className="flex items-center gap-2">
-              <input type="checkbox" checked={it.done} />
-              <label>{it.text}</label>
-            </li>
-          ))}
-        </ul>
-      );
-    default:
-      return (
-        <p>
-          Unknown block {type} {items.map((it) => it.text).join(";")}
-        </p>
-      );
-  }
-};
-
 const Todo = ({ note }: { note: NoteBlock }) => {
   const todos = note.lines.filter((l) => l.type === "todo");
   if (todos.length === 0) return null;
@@ -322,8 +266,6 @@ type MdxBlock = {
   items: MdxLine[];
 };
 
-const parseMdLines = (md: string) => md.split("\n").map((l) => parseMdLine(l));
-
 const groupLineBlocks = (lines: MdxLine[]) => {
   const blocks: MdxBlock[] = [];
 
@@ -343,9 +285,15 @@ const groupLineBlocks = (lines: MdxLine[]) => {
   return blocks;
 };
 
+//
+const regHeading = /^(\#{1,3})\s(.*)$/;
+const regTodo = /^-\s*\[([x ]?)\]\s*(.*)$/i;
+const regList = /^\s?[-*]\s(.*)$/;
+const regHabits = /\B\[([A-Z][a-z]*)(\d*)\]\B/g;
+const regTags = /\B\#\w+/g;
+
 const parseMdLine = (line: string) => {
-  const heading = /^(\#{1,3})\s(.*)$/;
-  const isheading = line.match(heading);
+  const isheading = line.match(regHeading);
   if (isheading) {
     return {
       type: `heading`,
@@ -354,8 +302,7 @@ const parseMdLine = (line: string) => {
     };
   }
 
-  const todo = /^-\s*\[([x ]?)\]\s*(.*)$/i;
-  const istodo = line.match(todo);
+  const istodo = line.match(regTodo);
   if (istodo)
     return {
       type: "todo",
@@ -363,8 +310,7 @@ const parseMdLine = (line: string) => {
       done: istodo[1] === "x",
     };
 
-  const list = /^\s?[-*]\s(.*)$/;
-  const islist = line.match(list);
+  const islist = line.match(regList);
   if (islist)
     return {
       type: "list",
@@ -377,12 +323,11 @@ const parseMdLine = (line: string) => {
   };
 };
 
-const parseMdTags = (md: string) =>
-  [...md.matchAll(/\B\#\w+/g)].map((match) => match[0].trim());
+const extractMdTags = (md: string) =>
+  [...md.matchAll(regTags)].map((match) => match[0].trim());
 
-const parseMdHabits = (md: string) => {
-  const habits = /\B\[([A-Z][a-z]*)(\d*)\]\B/g;
-  const matches = [...md.matchAll(habits)];
+const extractMdHabits = (md: string) => {
+  const matches = [...md.matchAll(regHabits)];
   return matches.map((match) => ({
     type: "habit" as const,
     name: match[1],

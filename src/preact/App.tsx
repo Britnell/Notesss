@@ -235,16 +235,29 @@ const Note = ({
   const blocks = groupLineBlocks(note.lines);
 
   useEffect(() => {
-    const onBLur = () => {
+    const onBlur = () => {
       saveNote(note, editedMd);
       setEditing(false);
     };
+    const onDoubleClick = () => startEditing();
+
     const textarea = editRef.current?.querySelector("textarea");
-    textarea?.addEventListener("blur", onBLur);
+
+    textarea?.addEventListener("blur", onBlur);
+    previewRef.current?.addEventListener("dblclick", onDoubleClick);
     return () => {
-      textarea?.addEventListener("blur", onBLur);
+      textarea?.removeEventListener("blur", onBlur);
+      previewRef.current?.removeEventListener("dblclick", onDoubleClick);
     };
-  }, [editing]);
+  }, [editing, editedMd]);
+
+  const startEditing = () => {
+    const h = previewRef.current?.getBoundingClientRect().height;
+    h && setHeight(h);
+    setEditedMd(note.text);
+    setEditing(true);
+    setTimeout(() => editRef.current?.querySelector("textarea")?.focus(), 50);
+  };
 
   return (
     <NoteCard date={note.date}>
@@ -263,7 +276,7 @@ const Note = ({
             <textarea
               className={" w-full p-2 max-h-[50vh] "}
               value={editedMd}
-              onChange={(ev) =>
+              onInput={(ev) =>
                 setEditedMd((ev.target as HTMLInputElement).value)
               }
               style={{ height: `${height}px` }}
@@ -273,16 +286,7 @@ const Note = ({
         {!editing && (
           <button
             className=" absolute top-[30px] right-2"
-            onClick={() => {
-              const h = previewRef.current?.getBoundingClientRect().height;
-              h && setHeight(h);
-              setEditedMd(note.text);
-              setEditing(true);
-              setTimeout(
-                () => editRef.current?.querySelector("textarea")?.focus(),
-                50
-              );
-            }}
+            onClick={startEditing}
           >
             Edit
           </button>

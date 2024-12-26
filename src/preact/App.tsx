@@ -1,4 +1,4 @@
-import { useRef, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type { Note } from "../db/schema";
 import {
   extractMdHabits,
@@ -49,7 +49,6 @@ export default function App(props: { notes: Note[]; user: User }) {
     links: extractMdLinks(n.text),
   }));
   const userId = props.user.id;
-  const missingTodays = notes[0]?.date !== today;
 
   function saveNote(editNote: Note, newText: string) {
     const newNote = { ...editNote, text: newText };
@@ -73,7 +72,7 @@ export default function App(props: { notes: Note[]; user: User }) {
       });
   }
 
-  function addToday() {
+  function addNote() {
     const empty = {
       id: 0.1,
       date: today,
@@ -137,19 +136,7 @@ export default function App(props: { notes: Note[]; user: User }) {
 
       <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-6">
         {currentTab === "notes" && (
-          <>
-            {missingTodays && (
-              <div className="">
-                <div>{today}</div>
-                <button className=" border border-white" onClick={addToday}>
-                  add todays note
-                </button>
-              </div>
-            )}
-            {dateBlocks.map((note) => (
-              <Note key={note.date} note={note} saveNote={saveNote} />
-            ))}
-          </>
+          <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} />
         )}
         {currentTab === "todos" && (
           <>
@@ -170,6 +157,34 @@ export default function App(props: { notes: Note[]; user: User }) {
   );
 }
 
+const Notes = ({
+  blocks,
+  saveNote,
+  addNote,
+}: {
+  blocks: NoteBlock[];
+  saveNote: (note: Note, newText: string) => void;
+  addNote: () => void;
+}) => {
+  const missingTodays = blocks[0]?.date !== today;
+
+  return (
+    <>
+      {missingTodays && (
+        <div className="">
+          <div>{today}</div>
+          <button className=" border border-white" onClick={addNote}>
+            add todays note
+          </button>
+        </div>
+      )}
+      {blocks.map((note) => (
+        <Note key={note.date} note={note} saveNote={saveNote} />
+      ))}
+    </>
+  );
+};
+
 const NoteCard = ({
   date,
   children,
@@ -180,7 +195,7 @@ const NoteCard = ({
   return (
     <div className=" card relative ">
       <h3 className=" text-center text-base">{date}</h3>
-      <div className=" bg-slate-800 p-2 ">{children}</div>
+      <div className=" bg-slate-800 p-2 rounded-lg ">{children}</div>
     </div>
   );
 };
@@ -219,6 +234,18 @@ const Note = ({
 
   const blocks = groupLineBlocks(note.lines);
 
+  useEffect(() => {
+    const onBLur = () => {
+      saveNote(note, editedMd);
+      setEditing(false);
+    };
+    const textarea = editRef.current?.querySelector("textarea");
+    textarea?.addEventListener("blur", onBLur);
+    return () => {
+      textarea?.addEventListener("blur", onBLur);
+    };
+  }, [editing]);
+
   return (
     <NoteCard date={note.date}>
       <>
@@ -243,44 +270,24 @@ const Note = ({
             />
           </div>
         )}
-      </>
-      <div className=" absolute top-[30px] right-2">
-        {!editing ? (
+        {!editing && (
           <button
+            className=" absolute top-[30px] right-2"
             onClick={() => {
               const h = previewRef.current?.getBoundingClientRect().height;
               h && setHeight(h);
               setEditedMd(note.text);
               setEditing(true);
+              setTimeout(
+                () => editRef.current?.querySelector("textarea")?.focus(),
+                50
+              );
             }}
           >
             Edit
           </button>
-        ) : (
-          <>
-            <button
-              onClick={() => {
-                // TODO - dont save if no changes
-                saveNote(note, editedMd);
-                setEditing(false);
-              }}
-            >
-              Save
-            </button>
-          </>
         )}
-      </div>
-      <div className="absolute top-[30px] -right-2 translate-x-full">
-        {editing && (
-          <button
-            onClick={() => {
-              setEditing(false);
-            }}
-          >
-            Cancel
-          </button>
-        )}
-      </div>
+      </>
       <div className="mt-2 flex items-center flex-wrap gap-2">
         {note.habits.map((habit) => (
           <div className="px-2 py-1  bg-slate-800 rounded-lg">

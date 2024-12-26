@@ -1,6 +1,15 @@
 import { useRef, useState } from "preact/hooks";
 import type { Note } from "../db/schema";
-import { MarkDownBlock, type MdxLine } from "./MarkDown";
+import {
+  extractMdHabits,
+  extractMdLinks,
+  extractMdTags,
+  MarkDownBlock,
+  MdText,
+  parseMdLine,
+  type MdxLine,
+} from "./MarkDown";
+import type { VNode } from "preact";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -8,8 +17,13 @@ type NoteBlock = Note & {
   lines: MdxLine[];
   tags: string[];
   habits: Habit[];
+  links: Link[];
 };
 
+type Link = {
+  text: string;
+  href: string;
+};
 type Habit = {
   type: "habit";
   name: string;
@@ -33,6 +47,7 @@ export default function App(props: { notes: Note[]; user: User }) {
     lines: n.text.split("\n").map((l) => parseMdLine(l)),
     tags: extractMdTags(n.text),
     habits: extractMdHabits(n.text),
+    links: extractMdLinks(n.text),
   }));
   const userId = props.user.id;
   const missingTodays = notes[0]?.date !== today;
@@ -103,6 +118,7 @@ export default function App(props: { notes: Note[]; user: User }) {
         </div>
         <a href="/logout">logout</a>
       </header>
+
       <aside className=" fixed right-0 bottom-0 top-[50px] w-18 pb-20">
         <div className=" h-full p-3 flex flex-col justify-center gap-3">
           {tabs.map((tab) => (
@@ -119,6 +135,7 @@ export default function App(props: { notes: Note[]; user: User }) {
           <button className="aspect-square text-xs p-[2px] ">+</button>
         </div>
       </aside>
+
       <main className="px-6 max-w-[70ch] mx-auto">
         {currentTab === "notes" && (
           <div className="space-y-6">
@@ -136,9 +153,16 @@ export default function App(props: { notes: Note[]; user: User }) {
           </div>
         )}
         {currentTab === "todos" && (
-          <div>
+          <>
             {dateBlocks.map((note) => (
               <Todo key={note.date} note={note} />
+            ))}
+          </>
+        )}
+        {currentTab === "links" && (
+          <div>
+            {dateBlocks.map((note) => (
+              <Link key={note.date} note={note} />
             ))}
           </div>
         )}
@@ -146,6 +170,39 @@ export default function App(props: { notes: Note[]; user: User }) {
     </div>
   );
 }
+
+const NoteCard = ({
+  date,
+  children,
+}: {
+  date: string;
+  children: VNode | VNode[];
+}) => {
+  return (
+    <div className=" card relative ">
+      <h3 className=" text-center">{date}</h3>
+      <div className=" bg-slate-800 p-2 ">{children}</div>
+    </div>
+  );
+};
+
+const Link = ({ note }: { note: NoteBlock }) => {
+  if (note.links.length === 0) return null;
+
+  return (
+    <NoteCard date={note.date}>
+      <ul className="space-y-3 list-disc ml-6">
+        {note.links.map((l) => (
+          <li>
+            <a className="underline capitalize w-full flex " href={l.href}>
+              {l.text} : <span className=" ml-4 ..">{l.href}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </NoteCard>
+  );
+};
 
 const Note = ({
   note,
@@ -163,9 +220,8 @@ const Note = ({
   const blocks = groupLineBlocks(note.lines);
 
   return (
-    <div className=" card relative ">
-      <div className=" text-center">{note.date}</div>
-      <div className=" bg-slate-800 p-2 ">
+    <NoteCard date={note.date}>
+      <>
         {!editing && (
           <div ref={previewRef} className="p-2">
             <div className="markdown">
@@ -187,7 +243,7 @@ const Note = ({
             />
           </div>
         )}
-      </div>
+      </>
       <div className=" absolute top-[30px] right-2">
         {!editing ? (
           <button
@@ -238,7 +294,7 @@ const Note = ({
           </span>
         ))}
       </div>
-    </div>
+    </NoteCard>
   );
 };
 
@@ -247,8 +303,7 @@ const Todo = ({ note }: { note: NoteBlock }) => {
   if (todos.length === 0) return null;
 
   return (
-    <div className=" py-4">
-      <div className="text-center">{note.date}</div>
+    <NoteCard date={note.date}>
       <ul className="space-y-3">
         {todos.map((item) => (
           <li className="flex items-center gap-2">
@@ -257,7 +312,7 @@ const Todo = ({ note }: { note: NoteBlock }) => {
           </li>
         ))}
       </ul>
-    </div>
+    </NoteCard>
   );
 };
 
@@ -286,51 +341,3 @@ const groupLineBlocks = (lines: MdxLine[]) => {
 };
 
 //
-const regHeading = /^(\#{1,3})\s(.*)$/;
-const regTodo = /^-\s*\[([x ]?)\]\s*(.*)$/i;
-const regList = /^\s?[-*]\s(.*)$/;
-const regHabits = /\B\[([A-Z][a-z]*)(\d*)\]\B/g;
-const regTags = /\B\#\w+/g;
-
-const parseMdLine = (line: string) => {
-  const isheading = line.match(regHeading);
-  if (isheading) {
-    return {
-      type: `heading`,
-      level: isheading[1].length,
-      text: isheading[2],
-    };
-  }
-
-  const istodo = line.match(regTodo);
-  if (istodo)
-    return {
-      type: "todo",
-      text: istodo[2],
-      done: istodo[1] === "x",
-    };
-
-  const islist = line.match(regList);
-  if (islist)
-    return {
-      type: "list",
-      text: islist[1],
-    };
-
-  return {
-    type: "p",
-    text: line,
-  };
-};
-
-const extractMdTags = (md: string) =>
-  [...md.matchAll(regTags)].map((match) => match[0].trim());
-
-const extractMdHabits = (md: string) => {
-  const matches = [...md.matchAll(regHabits)];
-  return matches.map((match) => ({
-    type: "habit" as const,
-    name: match[1],
-    value: parseInt(match[2]) || undefined,
-  }));
-};

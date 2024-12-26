@@ -1,3 +1,17 @@
+import {
+  regBold,
+  regHabit,
+  regHabits,
+  regHeading,
+  regitalic,
+  regLink,
+  regLinks,
+  regTag,
+  regTags,
+  regList,
+  regTodo,
+} from "../lib/regex";
+
 export type MdxLine = {
   type: string;
   text: string;
@@ -62,14 +76,7 @@ export const MarkDownBlock = ({
   }
 };
 
-// md Rendering
-const regLink = /\[([^\]]+)\]\(([^)]+)\)/;
-const regBold = /\*\*(\w+(?:\s\w+)*)\*\*/;
-const regitalic = /\*(\w+(?:\s\w+)*)\*/;
-const regTag = /\B\#(\w+)/;
-const regHabit = /\B\[([A-Z][a-z]*)(\d*)\]\B/;
-
-const MdText = ({ md }: { md: string }) => {
+export const MdText = ({ md }: { md: string }) => {
   let parsing = md;
 
   // parse [links](...)
@@ -123,3 +130,54 @@ const mdParseLoop = (
   }
   return parsing;
 };
+
+export const parseMdLine = (line: string) => {
+  const isheading = line.match(regHeading);
+  if (isheading) {
+    return {
+      type: `heading`,
+      level: isheading[1].length,
+      text: isheading[2],
+    };
+  }
+
+  const istodo = line.match(regTodo);
+  if (istodo)
+    return {
+      type: "todo",
+      text: istodo[2],
+      done: istodo[1] === "x",
+    };
+
+  const islist = line.match(regList);
+  if (islist)
+    return {
+      type: "list",
+      text: islist[1],
+    };
+
+  return {
+    type: "p",
+    text: line,
+  };
+};
+
+export const extractMdTags = (md: string) =>
+  [...md.matchAll(regTags)].map((match) => match[0].trim());
+
+export const extractMdHabits = (md: string) => {
+  const matches = [...md.matchAll(regHabits)];
+  return matches.map((match) => ({
+    type: "habit" as const,
+    name: match[1],
+    value: parseInt(match[2]) || undefined,
+  }));
+};
+
+export const extractMdLinks = (md: string) =>
+  [...md.matchAll(regLinks)].map((match) => {
+    return {
+      text: match[1],
+      href: match[2],
+    };
+  });

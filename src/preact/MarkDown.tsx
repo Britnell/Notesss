@@ -95,7 +95,7 @@ export const MdText = ({ md }: { md: string }) => {
     parsing,
     regTag,
     (match) =>
-      `<span class="font-semibold p-1 text-blue-100"><span>#</span>${match[1]}</span>`
+      `<span class="font-semibold p-1"><span>#</span>${match[1]}</span>`
   );
 
   // parse [habit]

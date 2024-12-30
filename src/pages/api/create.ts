@@ -11,13 +11,14 @@ export const POST: APIRoute = async ({ request }) => {
     status: 400,
   });
 
-  // todo zod check
+  // TODO - zod check
 
   const session = await auth.api.getSession({
     headers: request.headers,
   });
   if (!session || session?.user.id !== userId) return errResp;
 
+  // TODO - check note date does not exist
   const resp = await createNote({ date, text, userId });
   if (!resp) return errResp;
 

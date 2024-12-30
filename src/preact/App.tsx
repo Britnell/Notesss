@@ -72,12 +72,11 @@ export default function App(props: { notes: Note[]; user: User }) {
       });
   }
 
-  function addNote() {
+  function addNote(createDate: string) {
     const empty = {
       id: 0.1,
-      date: today,
+      date: createDate,
       text: "",
-      blocks: [],
       userId,
     };
     // optim
@@ -87,17 +86,14 @@ export default function App(props: { notes: Note[]; user: User }) {
       method: "POST",
       body: JSON.stringify(empty),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("not ok");
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((created) => {
         setNotes((_notes) =>
-          _notes.map((n) => (n.date === today ? created : n))
+          _notes.map((n) => (n.date === createDate ? created : n))
         );
       })
       .catch(() => {
-        setNotes((n) => n.filter((n) => n.date !== today));
+        setNotes((n) => n.filter((n) => n.date !== createDate));
       });
   }
 
@@ -130,7 +126,7 @@ export default function App(props: { notes: Note[]; user: User }) {
               {tab}
             </button>
           ))}
-          <button className="aspect-square text-xs p-[2px] ">+</button>
+          <AddButton addNote={addNote} />
         </div>
       </aside>
 
@@ -157,6 +153,38 @@ export default function App(props: { notes: Note[]; user: User }) {
   );
 }
 
+const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
+  const [open, setOpen] = useState(false);
+  const [date, setDate] = useState(today);
+
+  return (
+    <div className="relative">
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          className=" w-full aspect-square text-xs p-[2px] "
+        >
+          +
+        </button>
+      )}
+      {open && (
+        <div className=" absolute right-0 flex gap-2 ">
+          <div className="x">
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate((e.target as HTMLInputElement)?.value)}
+              className=""
+            />
+          </div>
+          <button onClick={() => addNote(date)}>+</button>
+          <button onClick={() => setOpen(false)}>x</button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Notes = ({
   blocks,
   saveNote,
@@ -164,7 +192,7 @@ const Notes = ({
 }: {
   blocks: NoteBlock[];
   saveNote: (note: Note, newText: string) => void;
-  addNote: () => void;
+  addNote: (date: string) => void;
 }) => {
   const missingTodays = blocks[0]?.date !== today;
 
@@ -173,7 +201,10 @@ const Notes = ({
       {missingTodays && (
         <div className="">
           <div>{today}</div>
-          <button className=" border border-white" onClick={addNote}>
+          <button
+            className=" border border-white"
+            onClick={() => addNote(today)}
+          >
             add todays note
           </button>
         </div>
@@ -285,7 +316,7 @@ const Note = ({
         )}
         {!editing && (
           <button
-            className=" absolute top-[30px] right-2"
+            className=" absolute top-[34px] right-3"
             onClick={startEditing}
           >
             Edit

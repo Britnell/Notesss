@@ -158,7 +158,7 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
   const [date, setDate] = useState(today);
 
   return (
-    <div className="relative">
+    <div className=" relative z-10 ">
       {!open && (
         <button
           onClick={() => setOpen(true)}
@@ -168,7 +168,7 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
         </button>
       )}
       {open && (
-        <div className=" absolute right-0 flex gap-2 ">
+        <div className="absolute right-0  flex gap-2 ">
           <div className="x">
             <input
               type="date"
@@ -178,7 +178,12 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
             />
           </div>
           <button onClick={() => addNote(date)}>+</button>
-          <button onClick={() => setOpen(false)}>x</button>
+          <button
+            className=" w-full aspect-square text-xs p-[2px] "
+            onClick={() => setOpen(false)}
+          >
+            x
+          </button>
         </div>
       )}
     </div>

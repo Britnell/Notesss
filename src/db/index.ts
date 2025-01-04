@@ -1,5 +1,5 @@
 import { and, desc, eq } from "drizzle-orm";
-import { notes, type Note } from "./schema";
+import { notes } from "./schema";
 import { db, tursoClient } from "./turso";
 
 export const exec = (sql: string) => tursoClient.execute(sql);

@@ -19,7 +19,10 @@ export const POST: APIRoute = async ({ request }) => {
   if (!session || session?.user.id !== userId) return errResp;
 
   // TODO - check note date does not exist
-  const resp = await createNote({ date, text, userId });
+
+  const resp = await createNote({ date, text, userId }).catch(() => {
+    return null;
+  });
   if (!resp) return errResp;
 
   return new Response(JSON.stringify(resp), {

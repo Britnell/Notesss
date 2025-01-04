@@ -1,16 +1,30 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 import { type InferSelectModel } from "drizzle-orm";
 
 export type Note = InferSelectModel<typeof notes>;
 
-export const notes = sqliteTable("notes", {
-  id: integer("id").primaryKey(),
-  date: text("date").notNull(),
-  text: text("text").notNull(),
-  userId: text("userId")
-    .notNull()
-    .references(() => user.id),
-});
+export const notes = sqliteTable(
+  "notes",
+  {
+    id: integer("id").primaryKey(),
+    date: text("date").notNull(),
+    text: text("text").notNull(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id),
+  },
+  (note) => ({
+    uniqueUserIdDate: uniqueIndex("unique_user_id_date").on(
+      note.userId,
+      note.date
+    ),
+  })
+);
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),

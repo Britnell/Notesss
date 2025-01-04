@@ -73,8 +73,9 @@ export default function App(props: { notes: Note[]; user: User }) {
   }
 
   function addNote(createDate: string) {
+    const tempId = Date.now();
     const empty = {
-      id: 0.1,
+      id: tempId,
       date: createDate,
       text: "",
       userId,
@@ -89,11 +90,11 @@ export default function App(props: { notes: Note[]; user: User }) {
       .then((res) => res.json())
       .then((created) => {
         setNotes((_notes) =>
-          _notes.map((n) => (n.date === createDate ? created : n))
+          _notes.map((n) => (n.id === tempId ? created : n))
         );
       })
       .catch(() => {
-        setNotes((n) => n.filter((n) => n.date !== createDate));
+        setNotes((n) => n.filter((n) => n.id !== tempId));
       });
   }
 

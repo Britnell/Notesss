@@ -9,6 +9,7 @@ import {
   type MdxLine,
 } from "./MarkDown";
 import type { VNode } from "preact";
+import type { FormEvent, FormEventHandler } from "preact/compat";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -114,7 +115,7 @@ export default function App(props: { notes: Note[]; user: User }) {
         <a href="/logout">logout</a>
       </header>
 
-      <aside className=" fixed right-0 bottom-0 top-[50px] w-18 pb-20">
+      <aside className=" fixed z-10 right-0 bottom-0 top-[50px] w-18 pb-20">
         <div className=" h-full p-3 flex flex-col justify-center gap-3">
           {tabs.map((tab) => (
             <button
@@ -158,8 +159,13 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(today);
 
+  const onSubmit = (e: Event) => {
+    e.preventDefault();
+    addNote(date);
+    setOpen(false);
+  };
   return (
-    <div className=" relative z-10 ">
+    <div className="relative ">
       {!open && (
         <button
           onClick={() => setOpen(true)}
@@ -169,23 +175,26 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
         </button>
       )}
       {open && (
-        <div className="absolute right-0  flex gap-2 ">
-          <div className="x">
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate((e.target as HTMLInputElement)?.value)}
-              className=""
-            />
+        <form onSubmit={onSubmit}>
+          <div className="absolute right-0  flex gap-2 z-20 ">
+            <div className="x">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate((e.target as HTMLInputElement)?.value)}
+                className=""
+              />
+            </div>
+            <button type="submit">+</button>
+            <button
+              type="button"
+              className=" size-8   "
+              onClick={() => setOpen(false)}
+            >
+              x
+            </button>
           </div>
-          <button onClick={() => addNote(date)}>+</button>
-          <button
-            className=" w-full aspect-square text-xs p-[2px] "
-            onClick={() => setOpen(false)}
-          >
-            x
-          </button>
-        </div>
+        </form>
       )}
     </div>
   );

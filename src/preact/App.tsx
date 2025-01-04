@@ -9,7 +9,6 @@ import {
   type MdxLine,
 } from "./MarkDown";
 import type { VNode } from "preact";
-import type { FormEvent, FormEventHandler } from "preact/compat";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -30,7 +29,7 @@ type Habit = {
   value?: number;
 };
 
-const tabs = ["notes", "todos", "links", "cal"];
+const tabs = ["notes", "todos", "links", "habits", "cal"];
 
 type User = {
   id: string;
@@ -50,6 +49,7 @@ export default function App(props: { notes: Note[]; user: User }) {
       habits: extractMdHabits(n.text),
       links: extractMdLinks(n.text),
     }))
+    // .filter((note) => note.text !== "x")
     .sort((a, b) => {
       const da = new Date(a.date);
       const db = new Date(b.date);
@@ -154,6 +154,24 @@ export default function App(props: { notes: Note[]; user: User }) {
             {dateBlocks.map((note) => (
               <Link key={note.date} note={note} />
             ))}
+          </div>
+        )}
+        {currentTab === "habits" && (
+          <div className=" ">
+            {dateBlocks.map((note) => {
+              if (note.habits.length === 0) return null;
+              return (
+                <NoteCard date={note.date}>
+                  <div className="x">
+                    {note.habits.map((h) => (
+                      <span key={h}>
+                        {h.name} {h.value}
+                      </span>
+                    ))}
+                  </div>
+                </NoteCard>
+              );
+            })}
           </div>
         )}
       </main>

@@ -1,20 +1,20 @@
 {
-    "name": "🤖 Chatter",
-    "short_name": "chatter",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#000000",
-    "icons": [
-      {
-        "src": "/android-chrome-192x192",
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": "/android-chrome-512x512",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
+  "name": "Notesss",
+  "short_name": "Notesss",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
-  }
+}

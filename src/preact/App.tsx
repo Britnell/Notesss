@@ -42,13 +42,19 @@ export default function App(props: { notes: Note[]; user: User }) {
   const [currentTab, setCurrentTab] = useState(tabs[0]);
   const [search, setSearch] = useState("");
 
-  const dateBlocks = notes.map((n) => ({
-    ...n,
-    lines: n.text.split("\n").map((l) => parseMdLine(l)),
-    tags: extractMdTags(n.text),
-    habits: extractMdHabits(n.text),
-    links: extractMdLinks(n.text),
-  }));
+  const dateBlocks = notes
+    .map((n) => ({
+      ...n,
+      lines: n.text.split("\n").map((l) => parseMdLine(l)),
+      tags: extractMdTags(n.text),
+      habits: extractMdHabits(n.text),
+      links: extractMdLinks(n.text),
+    }))
+    .sort((a, b) => {
+      const da = new Date(a.date);
+      const db = new Date(b.date);
+      return db.getTime() - da.getTime();
+    });
   const userId = props.user.id;
 
   function saveNote(editNote: Note, newText: string) {
@@ -287,12 +293,19 @@ const Note = ({
     };
     const onDoubleClick = () => startEditing();
 
+    const onKey = (ev: KeyboardEvent) => {
+      if (ev.code === "Escape") {
+        onBlur();
+      }
+    };
     const textarea = editRef.current?.querySelector("textarea");
 
     textarea?.addEventListener("blur", onBlur);
+    textarea?.addEventListener("keydown", onKey);
     previewRef.current?.addEventListener("dblclick", onDoubleClick);
     return () => {
       textarea?.removeEventListener("blur", onBlur);
+      textarea?.removeEventListener("keydown", onKey);
       previewRef.current?.removeEventListener("dblclick", onDoubleClick);
     };
   }, [editing, editedMd]);

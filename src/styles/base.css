@@ -61,5 +61,8 @@ body {
     & a {
       text-decoration: underline;
     }
+    & span.block {
+      min-height: 1lh;
+    }
   }
 }

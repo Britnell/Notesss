@@ -459,7 +459,7 @@ const Note = ({
         )}
         {!editing && (
           <button
-            className=" absolute top-2 right-2 size-8 rounded-full"
+            className=" absolute top-2 right-2 size-8 rounded-full border-none hover:bg-slate-900"
             onClick={startEditing}
           >
             ✎

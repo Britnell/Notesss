@@ -170,7 +170,7 @@ export default function App(props: { notes: Note[]; user: User }) {
         </div>
       </aside>
 
-      <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-6">
+      <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-4">
         {currentTab === "notes" && (
           <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} />
         )}
@@ -291,21 +291,33 @@ const Notes = ({
         </div>
       )}
       {Object.values(monthBlocks).map((bls) => {
-        const [y, m] = bls[0].date.split("-");
         return (
-          <div key={y + m} className="">
-            <h3 className=" text-xl text-right">
-              {months[m]} {y}
-            </h3>
-            <div className=" space-y-4">
-              {bls.map((note) => (
-                <Note key={note.date} note={note} saveNote={saveNote} />
-              ))}
-            </div>
-          </div>
+          <MonthBlock date={bls[0].date}>
+            {bls.map((note) => (
+              <Note key={note.date} note={note} saveNote={saveNote} />
+            ))}
+          </MonthBlock>
         );
       })}
     </>
+  );
+};
+
+const MonthBlock = ({
+  date,
+  children,
+}: {
+  date: string;
+  children: VNode | VNode[];
+}) => {
+  const [y, m] = date.split("-");
+  return (
+    <div key={y + m} className="month">
+      <h3 className=" text-xl text-right">
+        {months[m]} {y}
+      </h3>
+      <div className=" space-y-4">{children}</div>
+    </div>
   );
 };
 
@@ -397,7 +409,7 @@ const Note = ({
     <NoteCard date={note.date}>
       <>
         {!editing && (
-          <div ref={previewRef} className="p-2">
+          <div ref={previewRef} className="px-2">
             <div className="markdown">
               {blocks.map(({ type, items }, i) => (
                 <MarkDownBlock key={`${i}-${type}`} type={type} items={items} />

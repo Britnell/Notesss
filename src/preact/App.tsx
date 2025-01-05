@@ -389,6 +389,11 @@ const Note = ({
       if (ev.code === "Escape") {
         onBlur();
       }
+      if (ev.code === "Enter") {
+        const ctrl = ev.ctrlKey || ev.metaKey;
+        if (ctrl) onBlur();
+        else setHeight((h) => h + 24);
+      }
     };
     const textarea = editRef.current?.querySelector("textarea");
 

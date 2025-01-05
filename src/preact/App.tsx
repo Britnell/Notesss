@@ -29,7 +29,7 @@ type Habit = {
   value?: number;
 };
 
-const tabs = ["notes", "todos", "links", "habits", "cal"];
+const tabs = ["notes", "todos", "links", "habits"];
 
 type User = {
   id: string;
@@ -369,19 +369,25 @@ const Note = ({
           </button>
         )}
       </>
-      <div className="mt-2 flex items-center flex-wrap gap-2">
-        {note.habits.map((habit) => (
-          <div className="px-2 py-1  bg-slate-800 rounded-lg">
-            <span>{habit.name}</span>
-            <span>{habit.value}</span>
+      <>
+        {note.habits.length + note.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 rounded bg-slate-900 px-2 py-[2px] w-fit font-extralight ">
+            {note.habits.map((habit) => (
+              <div className=" ">
+                <span>
+                  {habit.name}
+                  {habit.value}
+                </span>
+              </div>
+            ))}
+            {note.tags.map((tag, i) => (
+              <span className=" " key={i + tag}>
+                {tag}
+              </span>
+            ))}
           </div>
-        ))}
-        {note.tags.map((tag, i) => (
-          <span className=" underline" key={i + tag}>
-            {tag}
-          </span>
-        ))}
-      </div>
+        )}
+      </>
     </NoteCard>
   );
 };

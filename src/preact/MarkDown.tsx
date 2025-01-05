@@ -95,7 +95,7 @@ export const MdText = ({ md }: { md: string }) => {
     parsing,
     regTag,
     (match) =>
-      `<span class="font-semibold p-1"><span>#</span>${match[1]}</span>`
+      `<span class="font-semibold px-1 py-[2px] rounded bg-slate-900 text-white "><span>#</span>${match[1]}</span>`
   );
 
   // parse [habit]
@@ -103,7 +103,7 @@ export const MdText = ({ md }: { md: string }) => {
     parsing,
     regHabit,
     (match) =>
-      `<span class=" px-2 py-1 rounded bg-slate-900 ">${match[1]} ${match[2]}</span>`
+      `<span class="font-semibold px-1 py-[2px] rounded bg-slate-900 text-white ">${match[1]} ${match[2]}</span>`
   );
 
   return (

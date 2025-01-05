@@ -320,7 +320,9 @@ const NoteCard = (props: { date: string; children: VNode | VNode[] }) => {
         {nth}
         <span className=" ml-1 text-base">th</span>
       </h3>
-      <div className=" bg-slate-800 p-2 rounded-lg ">{props.children}</div>
+      <div className=" relative bg-slate-800 p-2 rounded-lg ">
+        {props.children}
+      </div>
     </div>
   );
 };
@@ -417,10 +419,10 @@ const Note = ({
         )}
         {!editing && (
           <button
-            className=" absolute top-[34px] right-3"
+            className=" absolute top-2 right-2 size-8 rounded-full"
             onClick={startEditing}
           >
-            Edit
+            ✎
           </button>
         )}
       </>

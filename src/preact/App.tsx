@@ -321,16 +321,24 @@ const MonthBlock = ({
   );
 };
 
+const getDayNth = (day: number) => {
+  if (day > 10 && day < 20) return "th";
+  const dig = day % 10;
+  if (dig === 1) return "st";
+  if (dig === 2) return "nd";
+  if (dig === 3) return "rd";
+  return "th";
+};
 const NoteCard = (props: { date: string; children: VNode | VNode[] }) => {
   const date = new Date(props.date);
   const day = days[date.getDay()];
-  const nth = date.getDate();
+  const d = date.getDate();
   return (
     <div className=" card relative ">
       <h3 className=" text-xl mb-1 flex justify-center items-end ">
         <span className="mr-2">{day}</span>
-        {nth}
-        <span className=" ml-1 text-base">th</span>
+        {d}
+        <span className=" ml-1 text-base">{getDayNth(d)}</span>
       </h3>
       <div className=" relative bg-slate-800 p-2 rounded-lg ">
         {props.children}

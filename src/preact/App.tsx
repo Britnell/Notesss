@@ -49,7 +49,7 @@ export default function App(props: { notes: Note[]; user: User }) {
       habits: extractMdHabits(n.text),
       links: extractMdLinks(n.text),
     }))
-    // .filter((note) => note.text !== "x")
+    .filter((note) => note.text !== "x")
     .sort((a, b) => {
       const da = new Date(a.date);
       const db = new Date(b.date);
@@ -80,6 +80,23 @@ export default function App(props: { notes: Note[]; user: User }) {
   }
 
   function addNote(createDate: string) {
+    // reset deleted note
+    const existing = notes.find((n) => n.date === createDate);
+    if (existing) {
+      if (existing.text === "x") {
+        // reset deleted note
+        setNotes((n) =>
+          n.map((note) =>
+            note.id === existing.id ? { ...note, text: "" } : note
+          )
+        );
+      } else {
+        // do nothing
+      }
+      return;
+    }
+
+    // Optimistic creation
     const tempId = Date.now();
     const empty = {
       id: tempId,
@@ -87,7 +104,6 @@ export default function App(props: { notes: Note[]; user: User }) {
       text: "",
       userId,
     };
-    // optim
     setNotes((n) => [empty, ...n]);
 
     fetch("/api/create", {

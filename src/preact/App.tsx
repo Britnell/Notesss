@@ -31,6 +31,23 @@ type Habit = {
 
 const tabs = ["notes", "todos", "links", "habits"];
 
+const days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+const months: Record<string, string> = {
+  "01": "Jan",
+  "02": "Feb",
+  "03": "Mar",
+  "04": "Apr",
+  "05": "May",
+  "06": "Jun",
+  "07": "Jul",
+  "08": "Aug",
+  "09": "Sep",
+  "10": "Oct",
+  "11": "Nov",
+  "12": "Dec",
+};
+
 type User = {
   id: string;
   name: string;
@@ -249,6 +266,16 @@ const Notes = ({
   addNote: (date: string) => void;
 }) => {
   const missingTodays = blocks[0]?.date !== today;
+  // const months = new Set(blocks.map((bl) => new Date(bl.date).getMonth() + 1));
+  const monthBlocks = blocks.reduce(
+    (acc: Record<number, NoteBlock[]>, bl: NoteBlock) => {
+      const month = new Date(bl.date).getMonth() + 1;
+      if (!acc[month]) acc[month] = [];
+      acc[month].push(bl);
+      return acc;
+    },
+    {}
+  );
 
   return (
     <>
@@ -263,14 +290,24 @@ const Notes = ({
           </button>
         </div>
       )}
-      {blocks.map((note) => (
-        <Note key={note.date} note={note} saveNote={saveNote} />
-      ))}
+      {Object.values(monthBlocks).map((bls) => {
+        const [y, m] = bls[0].date.split("-");
+        return (
+          <div key={y + m} className="">
+            <h3 className=" text-xl text-right">
+              {months[m]} {y}
+            </h3>
+            <div className=" space-y-4">
+              {bls.map((note) => (
+                <Note key={note.date} note={note} saveNote={saveNote} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </>
   );
 };
-
-const days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 const NoteCard = (props: { date: string; children: VNode | VNode[] }) => {
   const date = new Date(props.date);

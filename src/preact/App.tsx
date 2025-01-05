@@ -82,17 +82,16 @@ export default function App(props: { notes: Note[]; user: User }) {
   function addNote(createDate: string) {
     // reset deleted note
     const existing = notes.find((n) => n.date === createDate);
+    if (existing?.text === "x") {
+      setNotes((n) =>
+        n.map((note) =>
+          note.id === existing.id ? { ...note, text: "" } : note
+        )
+      );
+      return;
+    }
     if (existing) {
-      if (existing.text === "x") {
-        // reset deleted note
-        setNotes((n) =>
-          n.map((note) =>
-            note.id === existing.id ? { ...note, text: "" } : note
-          )
-        );
-      } else {
-        // do nothing
-      }
+      // do nothing
       return;
     }
 
@@ -128,7 +127,7 @@ export default function App(props: { notes: Note[]; user: User }) {
         <div className=" border border-white px-2 py-1 ">
           <span className=" pr-2">?</span>
           <input
-            name="search"
+            name="q"
             className=" bg-transparent text-white"
             value={search}
             onChange={(e) => setSearch((e.target as HTMLInputElement)?.value)}
@@ -271,17 +270,20 @@ const Notes = ({
   );
 };
 
-const NoteCard = ({
-  date,
-  children,
-}: {
-  date: string;
-  children: VNode | VNode[];
-}) => {
+const days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+const NoteCard = (props: { date: string; children: VNode | VNode[] }) => {
+  const date = new Date(props.date);
+  const day = days[date.getDay()];
+  const nth = date.getDate();
   return (
     <div className=" card relative ">
-      <h3 className=" text-center text-base">{date}</h3>
-      <div className=" bg-slate-800 p-2 rounded-lg ">{children}</div>
+      <h3 className=" text-xl mb-1 flex justify-center items-end ">
+        <span className="mr-2">{day}</span>
+        {nth}
+        <span className=" ml-1 text-base">th</span>
+      </h3>
+      <div className=" bg-slate-800 p-2 rounded-lg ">{props.children}</div>
     </div>
   );
 };

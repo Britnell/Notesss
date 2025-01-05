@@ -290,15 +290,13 @@ const Notes = ({
           </button>
         </div>
       )}
-      {Object.values(monthBlocks).map((bls) => {
-        return (
-          <MonthBlock date={bls[0].date}>
-            {bls.map((note) => (
-              <Note key={note.date} note={note} saveNote={saveNote} />
-            ))}
-          </MonthBlock>
-        );
-      })}
+      {Object.values(monthBlocks).map((bls) => (
+        <MonthBlock key={`m-${bls[0].date}`} date={bls[0].date}>
+          {bls.map((note) => (
+            <Note key={`d-${note.date}`} note={note} saveNote={saveNote} />
+          ))}
+        </MonthBlock>
+      ))}
     </>
   );
 };
@@ -378,7 +376,6 @@ const Note = ({
   const [height, setHeight] = useState(0);
   const previewRef = useRef<HTMLDivElement>(null);
   const editRef = useRef<HTMLDivElement>(null);
-
   const blocks = groupLineBlocks(note.lines);
 
   useEffect(() => {
@@ -413,14 +410,32 @@ const Note = ({
     setTimeout(() => editRef.current?.querySelector("textarea")?.focus(), 50);
   };
 
+  const onNoteClick = (ev: MouseEvent) => {
+    const tg = ev.target as HTMLInputElement;
+    const isCheckbox = tg.type === "checkbox";
+    if (!isCheckbox) return;
+    const label = tg.parentNode?.querySelector("label")?.textContent;
+    const reg = new RegExp(`-\\[[x ]\\]\\s+${label}`);
+    const match = reg.exec(note.text);
+    if (match === null) throw new Error(" cant find todo in the note");
+    const i = match.index + 2;
+    const toggled = note.text[i] === "x" ? " " : "x";
+    const newText = note.text.slice(0, i) + toggled + note.text.slice(i + 1);
+    saveNote(note, newText);
+  };
+
   return (
     <NoteCard date={note.date}>
       <>
         {!editing && (
           <div ref={previewRef} className="px-2">
-            <div className="markdown">
+            <div className="markdown" onClick={onNoteClick}>
               {blocks.map(({ type, items }, i) => (
-                <MarkDownBlock key={`${i}-${type}`} type={type} items={items} />
+                <MarkDownBlock
+                  key={`md-${i}-${type}`}
+                  type={type}
+                  items={items}
+                />
               ))}
             </div>
           </div>

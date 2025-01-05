@@ -4,16 +4,27 @@ import Page from '../components/page.astro'
 ---
 <Page>
 	<div class=" max-w-[800px] mx-auto">
-		<header>
-			<h1>Notess</h1>
+		<header class=" flex justify-between items-center py-1">
+			<span class=" text-4xl leading-none font-semibold">Notess</span>
+			<a href="/login" class=" rounded-full px-4 bg-white text-slate-800 font-bold text-lg " >
+				Go to app</a>
 		</header>
-		<main class="my-8">
+		<main class="my-8 text-lg space-y-4">
+			<h1 class=" my-8 text-center">Markdown your life together</h1>
+			<p>For developer that like using markdown notes, your notes app + a lot more :</p>
+			<ul class=" ml-4 list-disc">
+				<li>daily markdown notes</li>
+				<li>Todos</li>
+				<li>Habits</li>
+				<li>Links</li>
+				<li>(Calendar to come)</li>
+			</ul>
 			<p>
 				Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quas quasi tenetur culpa rem nulla, harum ducimus officia! Hic enim libero, eum quidem optio, minus eius, doloremque accusantium obcaecati nobis blanditiis?
 			</p>
 			<div class="flex ">
 				<a href="/login" class=" mx-auto mt-6 rounded-full px-4 bg-white text-slate-800 font-bold text-lg " >
-				Go to App</a>
+				Start the app</a>
 			</div>	
 		</main>
 	</div>

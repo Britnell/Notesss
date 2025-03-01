@@ -29,7 +29,7 @@ type Habit = {
   value?: number;
 };
 
-const tabs = ["notes", "todos", "links", "habits"];
+const tabs = ["notes", "todos", "habits", "links"];
 
 const days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
@@ -46,6 +46,15 @@ const months: Record<string, string> = {
   "10": "Oct",
   "11": "Nov",
   "12": "Dec",
+  1: "Jan",
+  2: "Feb",
+  3: "Mar",
+  4: "Apr",
+  5: "May",
+  6: "Jun",
+  7: "Jul",
+  8: "Aug",
+  9: "Sep",
 };
 
 type User = {
@@ -194,7 +203,7 @@ export default function App(props: { notes: Note[]; user: User }) {
             {dateBlocks.map((note) => {
               if (note.habits.length === 0) return null;
               return (
-                <NoteCard date={note.date}>
+                <NoteCard datestr={note.date}>
                   <div className="x">
                     {note.habits.map((h) => (
                       <span key={h}>
@@ -327,8 +336,16 @@ const getDayNth = (day: number) => {
   if (dig === 3) return "rd";
   return "th";
 };
-const NoteCard = (props: { date: string; children: VNode | VNode[] }) => {
-  const date = new Date(props.date);
+const NoteCard = ({
+  datestr,
+  children,
+  showMonth = false,
+}: {
+  datestr: string;
+  children: VNode | VNode[];
+  showMonth?: boolean;
+}) => {
+  const date = new Date(datestr);
   const day = days[date.getDay()];
   const d = date.getDate();
   return (
@@ -337,10 +354,11 @@ const NoteCard = (props: { date: string; children: VNode | VNode[] }) => {
         <span className="mr-2">{day}</span>
         <span>{d}</span>
         <span className=" ml-1 text-base">{getDayNth(d)}</span>
+        {showMonth && (
+          <span className=" ml-4">{months[date.getMonth() + 1]}</span>
+        )}
       </h3>
-      <div className=" relative bg-slate-800 p-2 rounded-lg ">
-        {props.children}
-      </div>
+      <div className=" relative bg-slate-800 p-2 rounded-lg ">{children}</div>
     </div>
   );
 };
@@ -349,7 +367,7 @@ const Link = ({ note }: { note: NoteBlock }) => {
   if (note.links.length === 0) return null;
 
   return (
-    <NoteCard date={note.date}>
+    <NoteCard datestr={note.date}>
       <ul className="space-y-3 list-disc ml-6">
         {note.links.map((l) => (
           <li>
@@ -435,7 +453,7 @@ const Note = ({
   };
 
   return (
-    <NoteCard date={note.date}>
+    <NoteCard datestr={note.date}>
       <>
         {!editing && (
           <div ref={previewRef} className="px-2">
@@ -521,7 +539,7 @@ const Todo = ({
   };
 
   return (
-    <NoteCard date={note.date}>
+    <NoteCard datestr={note.date} showMonth>
       <ul className="space-y-3" onClick={onClick}>
         {todos.map((item) => (
           <li className="flex items-center gap-2">

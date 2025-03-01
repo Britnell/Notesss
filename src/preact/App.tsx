@@ -282,7 +282,7 @@ const Notes = ({
   saveNote: (note: Note, newText: string) => void;
   addNote: (date: string) => void;
 }) => {
-  const missingTodays = blocks[0]?.date !== today;
+  const missingTodays = blocks.findIndex((n) => n.date === today) === -1;
 
   const monthBlocks = Object.values(
     blocks.reduce((acc: Record<string, NoteBlock[]>, bl: NoteBlock) => {

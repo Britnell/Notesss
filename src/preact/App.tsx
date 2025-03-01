@@ -311,7 +311,7 @@ const MonthBlock = ({
   const [y, m] = date.split("-");
   return (
     <div key={y + m} className="month">
-      <h3 className=" text-xl text-right">
+      <h3 className=" text-xl text-right sticky top-0 z-10 py-2 bg-slate-900">
         {months[m]} {y}
       </h3>
       <div className=" space-y-4">{children}</div>
@@ -333,9 +333,9 @@ const NoteCard = (props: { date: string; children: VNode | VNode[] }) => {
   const d = date.getDate();
   return (
     <div className=" card relative ">
-      <h3 className=" text-xl mb-1 flex justify-center items-end ">
+      <h3 className=" text-xl mb-1 flex justify-center items-end sticky top-0 z-10 py-2  ">
         <span className="mr-2">{day}</span>
-        {d}
+        <span>{d}</span>
         <span className=" ml-1 text-base">{getDayNth(d)}</span>
       </h3>
       <div className=" relative bg-slate-800 p-2 rounded-lg ">
@@ -448,7 +448,7 @@ const Note = ({
         {editing && (
           <div ref={editRef}>
             <textarea
-              className={" w-full p-2 max-h-[50vh] "}
+              className={" w-full p-2 max-h-[70vh] "}
               value={editedMd}
               onInput={(ev) =>
                 setEditedMd((ev.target as HTMLInputElement).value)

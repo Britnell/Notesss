@@ -108,11 +108,9 @@ export default function App(props: { notes: Note[]; user: User }) {
       return;
     }
     if (existing) {
-      // do nothing
-      return;
+      return; // do nothing
     }
 
-    // Optimistic creation
     const tempId = Date.now();
     const empty = {
       id: tempId,
@@ -120,8 +118,8 @@ export default function App(props: { notes: Note[]; user: User }) {
       text: "",
       userId,
     };
-    setNotes((n) => [empty, ...n]);
 
+    // send
     fetch("/api/create", {
       method: "POST",
       body: JSON.stringify(empty),
@@ -135,6 +133,9 @@ export default function App(props: { notes: Note[]; user: User }) {
       .catch(() => {
         setNotes((n) => n.filter((n) => n.id !== tempId));
       });
+
+    // Optimistic creation
+    setNotes((n) => [empty, ...n]);
   }
 
   return (
@@ -177,7 +178,7 @@ export default function App(props: { notes: Note[]; user: User }) {
         {currentTab === "todos" && (
           <>
             {dateBlocks.map((note) => (
-              <Todo key={note.date} note={note} />
+              <Todo key={note.date} note={note} saveNote={saveNote} />
             ))}
           </>
         )}
@@ -488,13 +489,35 @@ const Note = ({
   );
 };
 
-const Todo = ({ note }: { note: NoteBlock }) => {
+const Todo = ({
+  note,
+  saveNote,
+}: {
+  note: NoteBlock;
+  saveNote: (note: Note, newText: string) => void;
+}) => {
   const todos = note.lines.filter((l) => l.type === "todo");
   if (todos.length === 0) return null;
 
+  const onClick = (ev: MouseEvent) => {
+    const tg = ev.target as HTMLInputElement;
+    const isCheckbox = tg.type === "checkbox";
+
+    if (!isCheckbox) return;
+    const label = tg.parentNode?.querySelector("label")?.textContent;
+    const reg = new RegExp(`-\\[[x ]\\]\\s+${label}`);
+    const match = reg.exec(note.text);
+    // console.log({ label }, note.text);
+    if (match === null) throw new Error(" cant find todo in the note");
+    const i = match.index + 2;
+    const toggled = note.text[i] === "x" ? " " : "x";
+    const newText = note.text.slice(0, i) + toggled + note.text.slice(i + 1);
+    saveNote(note, newText);
+  };
+
   return (
     <NoteCard date={note.date}>
-      <ul className="space-y-3">
+      <ul className="space-y-3" onClick={onClick}>
         {todos.map((item) => (
           <li className="flex items-center gap-2">
             <input type="checkbox" checked={item.done} className="" />

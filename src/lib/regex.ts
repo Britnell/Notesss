@@ -8,6 +8,9 @@ export const regHabits = /\B[^-]\[([A-Za-z][a-z]*)(\d*)\]\B/g;
 export const regTag = /\B\#(\w+)/;
 export const regTags = /\B\#\w+/g;
 
+export const regMention = /\B\@(\w+)/;
+export const regMentions = /\B\@\w+/g;
+
 export const regLink = /\[([^\]]+)\]\(([^)]+)\)/;
 export const regLinks = /\[([^\]]+)\]\(([^)]+)\)/g;
 

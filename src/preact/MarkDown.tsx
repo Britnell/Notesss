@@ -10,6 +10,8 @@ import {
   regTags,
   regList,
   regTodo,
+  regMention,
+  regMentions,
 } from "../lib/regex";
 
 export type MdxLine = {
@@ -98,6 +100,14 @@ export const MdText = ({ md }: { md: string }) => {
       `<span class="font-semibold px-1 py-[2px] rounded bg-slate-900 text-white "><span>#</span>${match[1]}</span>`
   );
 
+  // parse @mention
+  parsing = mdParseLoop(
+    parsing,
+    regMention,
+    (match) =>
+      `<span class="font-semibold px-1 py-[2px] rounded bg-slate-900 text-white "><span>@</span>${match[1]}</span>`
+  );
+
   // parse [habit]
   parsing = mdParseLoop(
     parsing,
@@ -164,6 +174,9 @@ export const parseMdLine = (line: string) => {
 
 export const extractMdTags = (md: string) =>
   [...md.matchAll(regTags)].map((match) => match[0].trim());
+
+export const extractMdMentions = (md: string) =>
+  [...md.matchAll(regMentions)].map((match) => match[0].trim());
 
 export const extractMdHabits = (md: string) => {
   const matches = [...md.matchAll(regHabits)];

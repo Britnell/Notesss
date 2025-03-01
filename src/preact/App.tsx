@@ -3,6 +3,7 @@ import type { Note } from "../db/schema";
 import {
   extractMdHabits,
   extractMdLinks,
+  extractMdMentions,
   extractMdTags,
   MarkDownBlock,
   parseMdLine,
@@ -15,6 +16,7 @@ const today = new Date().toISOString().split("T")[0];
 type NoteBlock = Note & {
   lines: MdxLine[];
   tags: string[];
+  mentions: string[];
   habits: Habit[];
   links: Link[];
 };
@@ -72,6 +74,7 @@ export default function App(props: { notes: Note[]; user: User }) {
       ...n,
       lines: n.text.split("\n").map((l) => parseMdLine(l)),
       tags: extractMdTags(n.text),
+      mentions: extractMdMentions(n.text),
       habits: extractMdHabits(n.text),
       links: extractMdLinks(n.text),
     }))
@@ -499,8 +502,8 @@ const Note = ({
       <>
         {note.habits.length + note.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 rounded bg-slate-900 px-2 py-[2px] w-fit font-extralight ">
-            {note.habits.map((habit) => (
-              <div className=" ">
+            {note.habits.map((habit, i) => (
+              <div className=" " key={habit.name + i}>
                 <span>
                   {habit.name}
                   {habit.value}
@@ -508,7 +511,12 @@ const Note = ({
               </div>
             ))}
             {note.tags.map((tag, i) => (
-              <span className=" " key={i + tag}>
+              <span className=" " key={tag + i}>
+                {tag}
+              </span>
+            ))}
+            {note.mentions.map((tag, i) => (
+              <span className=" " key={tag + i}>
                 {tag}
               </span>
             ))}
@@ -537,7 +545,6 @@ const Todo = ({
     const label = tg.parentNode?.querySelector("label")?.textContent;
     const reg = new RegExp(`-\\[[x ]\\]\\s+${label}`);
     const match = reg.exec(note.text);
-    // console.log({ label }, note.text);
     if (match === null) throw new Error(" cant find todo in the note");
     const i = match.index + 2;
     const toggled = note.text[i] === "x" ? " " : "x";

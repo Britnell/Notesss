@@ -1,37 +1,45 @@
 ---
-import Page from '../components/page.astro'
-import { auth } from '../auth-server';
+import Page from "../components/page.astro";
+import { auth } from "../auth-server";
 
 const session = await auth.api.getSession({
   headers: Astro.request.headers,
 });
 
-if(session){
-	return Astro.redirect('/notes')
+if (session) {
+  return Astro.redirect("/notes");
 }
-
 ---
 
 <Page>
-	<div class=" max-w-[800px] mx-auto">
-		<header>
-			<h1>Notess</h1>
-		</header>
-		<main class="my-8">
-			<p>
-				Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quas quasi tenetur culpa rem nulla, harum ducimus officia! Hic enim libero, eum quidem optio, minus eius, doloremque accusantium obcaecati nobis blanditiis?
-			</p>
-			<button id="login" class="block mx-auto mt-6 rounded-full px-4 bg-white text-slate-800 font-bold text-lg ">Login w github</button>
-		</main>
-	</div>
-    <script>
-		import("../auth-client").then(({ signIn } )=>{
-			const login = document.getElementById("login")
-			if(login)
-				login.onclick = () => signIn.social({
-					provider: "github",
-					callbackURL: "/notes",
-				})
-		})
-    </script>
+  <div class="max-w-[800px] mx-auto">
+    <header>
+      <h1>Notess</h1>
+    </header>
+    <main class="my-8">
+      <p>
+        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quas quasi
+        tenetur culpa rem nulla, harum ducimus officia! Hic enim libero, eum
+        quidem optio, minus eius, doloremque accusantium obcaecati nobis
+        blanditiis?
+      </p>
+      <button
+        id="login"
+        class="block mx-auto mt-6 rounded-full px-4 bg-white text-slate-800 font-bold text-lg"
+        >Login w github</button
+      >
+    </main>
+  </div>
+  <script>
+    import("../auth-client").then(({ signIn }) => {
+      const login = document.getElementById("login");
+      if (login)
+        login.onclick = () => {
+          signIn.social({
+            provider: "github",
+            callbackURL: "/notes",
+          });
+        };
+    });
+  </script>
 </Page>

@@ -103,7 +103,7 @@ export const MdText = ({ md }: { md: string }) => {
     parsing,
     regHabit,
     (match) =>
-      `<span class="font-semibold px-1 py-[2px] rounded bg-slate-900 text-white ">${match[1]} ${match[2]}</span>`
+      `<span class="font-semibold px-1 py-[2px] rounded bg-slate-900 text-white ">${match[1]}${match[2]}</span>`
   );
 
   return (

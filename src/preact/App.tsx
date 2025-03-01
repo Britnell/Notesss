@@ -266,16 +266,15 @@ const Notes = ({
   addNote: (date: string) => void;
 }) => {
   const missingTodays = blocks[0]?.date !== today;
-  // const months = new Set(blocks.map((bl) => new Date(bl.date).getMonth() + 1));
-  const monthBlocks = blocks.reduce(
-    (acc: Record<number, NoteBlock[]>, bl: NoteBlock) => {
-      const month = new Date(bl.date).getMonth() + 1;
-      if (!acc[month]) acc[month] = [];
-      acc[month].push(bl);
+
+  const monthBlocks = Object.values(
+    blocks.reduce((acc: Record<string, NoteBlock[]>, bl: NoteBlock) => {
+      const yearMonth = bl.date.slice(0, 7);
+      if (!acc[yearMonth]) acc[yearMonth] = [];
+      acc[yearMonth].push(bl);
       return acc;
-    },
-    {}
-  );
+    }, {})
+  ).sort((a, b) => (b[0].date > a[0].date ? 1 : -1));
 
   return (
     <>
@@ -290,7 +289,7 @@ const Notes = ({
           </button>
         </div>
       )}
-      {Object.values(monthBlocks).map((bls) => (
+      {monthBlocks.map((bls) => (
         <MonthBlock key={`m-${bls[0].date}`} date={bls[0].date}>
           {bls.map((note) => (
             <Note key={`d-${note.date}`} note={note} saveNote={saveNote} />

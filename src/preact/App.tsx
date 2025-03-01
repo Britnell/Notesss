@@ -75,7 +75,13 @@ export default function App(props: { notes: Note[]; user: User }) {
       habits: extractMdHabits(n.text),
       links: extractMdLinks(n.text),
     }))
-    .filter((note) => note.text !== "x")
+    .filter((note) => {
+      if (note.text === "x") return false;
+      if (search === "") return true;
+      // simple search filter
+      const match = note.text.indexOf(search);
+      return match !== -1;
+    })
     .sort((a, b) => {
       const da = new Date(a.date);
       const db = new Date(b.date);
@@ -156,8 +162,9 @@ export default function App(props: { notes: Note[]; user: User }) {
           <input
             name="q"
             className=" bg-transparent text-white"
+            placeholder="search.."
             value={search}
-            onChange={(e) => setSearch((e.target as HTMLInputElement)?.value)}
+            onInput={(e) => setSearch((e.target as HTMLInputElement)?.value)}
           />
         </div>
         <a href="/logout">logout</a>
@@ -204,7 +211,7 @@ export default function App(props: { notes: Note[]; user: User }) {
               if (note.habits.length === 0) return null;
               return (
                 <NoteCard datestr={note.date}>
-                  <div className="x">
+                  <div className="">
                     {note.habits.map((h) => (
                       <span key={h}>
                         {h.name} {h.value}
@@ -243,7 +250,7 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
       {open && (
         <form onSubmit={onSubmit}>
           <div className="absolute right-0  flex gap-2 z-20 ">
-            <div className="x">
+            <div className="">
               <input
                 type="date"
                 value={date}

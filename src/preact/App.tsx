@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import type { Note } from "../db/schema";
+import { useEffect, useRef, useState } from 'preact/hooks';
+import type { Note } from '../db/schema';
 import {
   extractMdHabits,
   extractMdLinks,
@@ -8,10 +8,10 @@ import {
   MarkDownBlock,
   parseMdLine,
   type MdxLine,
-} from "./MarkDown";
-import type { VNode } from "preact";
+} from './MarkDown';
+import type { VNode } from 'preact';
 
-const today = new Date().toISOString().split("T")[0];
+const today = new Date().toISOString().split('T')[0];
 
 type NoteBlock = Note & {
   lines: MdxLine[];
@@ -26,37 +26,37 @@ type Link = {
   href: string;
 };
 type Habit = {
-  type: "habit";
+  type: 'habit';
   name: string;
   value?: number;
 };
 
-const tabs = ["notes", "todos", "habits", "links"];
+const tabs = ['notes', 'todos', 'habits', 'links'];
 
-const days = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 const months: Record<string, string> = {
-  "01": "Jan",
-  "02": "Feb",
-  "03": "Mar",
-  "04": "Apr",
-  "05": "May",
-  "06": "Jun",
-  "07": "Jul",
-  "08": "Aug",
-  "09": "Sep",
-  "10": "Oct",
-  "11": "Nov",
-  "12": "Dec",
-  1: "Jan",
-  2: "Feb",
-  3: "Mar",
-  4: "Apr",
-  5: "May",
-  6: "Jun",
-  7: "Jul",
-  8: "Aug",
-  9: "Sep",
+  '01': 'Jan',
+  '02': 'Feb',
+  '03': 'Mar',
+  '04': 'Apr',
+  '05': 'May',
+  '06': 'Jun',
+  '07': 'Jul',
+  '08': 'Aug',
+  '09': 'Sep',
+  '10': 'Oct',
+  '11': 'Nov',
+  '12': 'Dec',
+  1: 'Jan',
+  2: 'Feb',
+  3: 'Mar',
+  4: 'Apr',
+  5: 'May',
+  6: 'Jun',
+  7: 'Jul',
+  8: 'Aug',
+  9: 'Sep',
 };
 
 type User = {
@@ -67,20 +67,20 @@ type User = {
 export default function App(props: { notes: Note[]; user: User }) {
   const [notes, setNotes] = useState(props.notes);
   const [currentTab, setCurrentTab] = useState(tabs[0]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   const dateBlocks = notes
     .map((n) => ({
       ...n,
-      lines: n.text.split("\n").map((l) => parseMdLine(l)),
+      lines: n.text.split('\n').map((l) => parseMdLine(l)),
       tags: extractMdTags(n.text),
       mentions: extractMdMentions(n.text),
       habits: extractMdHabits(n.text),
       links: extractMdLinks(n.text),
     }))
     .filter((note) => {
-      if (note.text === "x") return false;
-      if (search === "") return true;
+      if (note.text === 'x') return false;
+      if (search === '') return true;
       // simple search filter
       const match = note.text.indexOf(search);
       return match !== -1;
@@ -96,33 +96,25 @@ export default function App(props: { notes: Note[]; user: User }) {
     const newNote = { ...editNote, text: newText };
 
     // optimistic
-    setNotes((_notes) =>
-      _notes.map((n) => (n.id === editNote.id ? newNote : n))
-    );
+    setNotes((_notes) => _notes.map((n) => (n.id === editNote.id ? newNote : n)));
 
-    fetch("/api/update", {
-      method: "POST",
+    fetch('/api/update', {
+      method: 'POST',
       body: JSON.stringify(newNote),
     })
       .then((res) => {
-        if (!res.ok) throw new Error("not ok");
+        if (!res.ok) throw new Error('not ok');
       })
       .catch(() => {
-        setNotes((_notes) =>
-          _notes.map((n) => (n.id === editNote.id ? editNote : n))
-        );
+        setNotes((_notes) => _notes.map((n) => (n.id === editNote.id ? editNote : n)));
       });
   }
 
   function addNote(createDate: string) {
     // reset deleted note
     const existing = notes.find((n) => n.date === createDate);
-    if (existing?.text === "x") {
-      setNotes((n) =>
-        n.map((note) =>
-          note.id === existing.id ? { ...note, text: "" } : note
-        )
-      );
+    if (existing?.text === 'x') {
+      setNotes((n) => n.map((note) => (note.id === existing.id ? { ...note, text: '' } : note)));
       return;
     }
     if (existing) {
@@ -133,20 +125,18 @@ export default function App(props: { notes: Note[]; user: User }) {
     const empty = {
       id: tempId,
       date: createDate,
-      text: "",
+      text: '',
       userId,
     };
 
     // send
-    fetch("/api/create", {
-      method: "POST",
+    fetch('/api/create', {
+      method: 'POST',
       body: JSON.stringify(empty),
     })
       .then((res) => res.json())
       .then((created) => {
-        setNotes((_notes) =>
-          _notes.map((n) => (n.id === tempId ? created : n))
-        );
+        setNotes((_notes) => _notes.map((n) => (n.id === tempId ? created : n)));
       })
       .catch(() => {
         setNotes((n) => n.filter((n) => n.id !== tempId));
@@ -177,10 +167,7 @@ export default function App(props: { notes: Note[]; user: User }) {
         <div className=" h-full p-3 flex flex-col justify-center gap-3">
           {tabs.map((tab) => (
             <button
-              className={
-                " aspect-square text-xs p-[2px] " +
-                (tab === currentTab ? " bg-white text-slate-800" : "")
-              }
+              className={' aspect-square text-xs p-[2px] ' + (tab === currentTab ? ' bg-white text-slate-800' : '')}
               onClick={() => setCurrentTab(tab)}
             >
               {tab}
@@ -191,24 +178,22 @@ export default function App(props: { notes: Note[]; user: User }) {
       </aside>
 
       <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-4">
-        {currentTab === "notes" && (
-          <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} />
-        )}
-        {currentTab === "todos" && (
+        {currentTab === 'notes' && <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} />}
+        {currentTab === 'todos' && (
           <>
             {dateBlocks.map((note) => (
               <Todo key={note.date} note={note} saveNote={saveNote} />
             ))}
           </>
         )}
-        {currentTab === "links" && (
+        {currentTab === 'links' && (
           <div>
             {dateBlocks.map((note) => (
               <Link key={note.date} note={note} />
             ))}
           </div>
         )}
-        {currentTab === "habits" && (
+        {currentTab === 'habits' && (
           <div className=" ">
             {dateBlocks.map((note) => {
               if (note.habits.length === 0) return null;
@@ -243,10 +228,7 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
   return (
     <div className="relative ">
       {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          className=" w-full aspect-square text-xs p-[2px] "
-        >
+        <button onClick={() => setOpen(true)} className=" w-full aspect-square text-xs p-[2px] ">
           +
         </button>
       )}
@@ -262,11 +244,7 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
               />
             </div>
             <button type="submit">+</button>
-            <button
-              type="button"
-              className=" size-8   "
-              onClick={() => setOpen(false)}
-            >
+            <button type="button" className=" size-8   " onClick={() => setOpen(false)}>
               x
             </button>
           </div>
@@ -293,7 +271,7 @@ const Notes = ({
       if (!acc[yearMonth]) acc[yearMonth] = [];
       acc[yearMonth].push(bl);
       return acc;
-    }, {})
+    }, {}),
   ).sort((a, b) => (b[0].date > a[0].date ? 1 : -1));
 
   return (
@@ -301,10 +279,7 @@ const Notes = ({
       {missingTodays && (
         <div className="">
           <div>{today}</div>
-          <button
-            className=" border border-white"
-            onClick={() => addNote(today)}
-          >
+          <button className=" border border-white" onClick={() => addNote(today)}>
             add todays note
           </button>
         </div>
@@ -320,14 +295,8 @@ const Notes = ({
   );
 };
 
-const MonthBlock = ({
-  date,
-  children,
-}: {
-  date: string;
-  children: VNode | VNode[];
-}) => {
-  const [y, m] = date.split("-");
+const MonthBlock = ({ date, children }: { date: string; children: VNode | VNode[] }) => {
+  const [y, m] = date.split('-');
   return (
     <div key={y + m} className="month">
       <h3 className=" text-xl text-right sticky top-0 z-10 py-2 bg-slate-900">
@@ -339,12 +308,12 @@ const MonthBlock = ({
 };
 
 const getDayNth = (day: number) => {
-  if (day > 10 && day < 20) return "th";
+  if (day > 10 && day < 20) return 'th';
   const dig = day % 10;
-  if (dig === 1) return "st";
-  if (dig === 2) return "nd";
-  if (dig === 3) return "rd";
-  return "th";
+  if (dig === 1) return 'st';
+  if (dig === 2) return 'nd';
+  if (dig === 3) return 'rd';
+  return 'th';
 };
 const NoteCard = ({
   datestr,
@@ -356,17 +325,19 @@ const NoteCard = ({
   showMonth?: boolean;
 }) => {
   const date = new Date(datestr);
-  const day = days[date.getDay()];
-  const d = date.getDate();
+  const nth = date.getDate();
+  const d = date.getDay();
+  const weekday = days[d];
+  let col = d === 0 ? 7 : d;
   return (
     <div className=" card relative ">
-      <h3 className=" text-xl mb-1 flex justify-center items-end sticky top-0 z-10 py-2  ">
-        <span className="mr-2">{day}</span>
-        <span>{d}</span>
-        <span className=" ml-1 text-base">{getDayNth(d)}</span>
-        {showMonth && (
-          <span className=" ml-4">{months[date.getMonth() + 1]}</span>
-        )}
+      <h3 className=" text-xl mb-1 sticky top-0 z-10 py-2 grid grid-cols-7 max-w-[500px] ">
+        <div style={{ gridColumnStart: col }}>
+          <span className="mr-2">{weekday}</span>
+          <span>{nth}</span>
+          <span className=" ml-1 text-base">{getDayNth(nth)}</span>
+        </div>
+        {showMonth && <span className=" ml-4">{months[date.getMonth() + 1]}</span>}
       </h3>
       <div className=" relative bg-slate-800 p-2 rounded-lg ">{children}</div>
     </div>
@@ -381,12 +352,7 @@ const Link = ({ note }: { note: NoteBlock }) => {
       <ul className="space-y-3 list-disc ml-6">
         {note.links.map((l) => (
           <li>
-            <a
-              className="underline w-full flex "
-              href={l.href}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a className="underline w-full flex " href={l.href} target="_blank" rel="noopener noreferrer">
               <span className="capitalize">{l.text}</span> : &nbsp;&nbsp;&nbsp;
               <span className=" flex-auto text-ellipsis">{l.href}</span>
             </a>
@@ -397,15 +363,9 @@ const Link = ({ note }: { note: NoteBlock }) => {
   );
 };
 
-const Note = ({
-  note,
-  saveNote,
-}: {
-  note: NoteBlock;
-  saveNote: (note: Note, newText: string) => void;
-}) => {
+const Note = ({ note, saveNote }: { note: NoteBlock; saveNote: (note: Note, newText: string) => void }) => {
   const [editing, setEditing] = useState(false);
-  const [editedMd, setEditedMd] = useState("");
+  const [editedMd, setEditedMd] = useState('');
   const [height, setHeight] = useState(0);
   const previewRef = useRef<HTMLDivElement>(null);
   const editRef = useRef<HTMLDivElement>(null);
@@ -419,24 +379,24 @@ const Note = ({
     const onDoubleClick = () => startEditing();
 
     const onKey = (ev: KeyboardEvent) => {
-      if (ev.code === "Escape") {
+      if (ev.code === 'Escape') {
         onBlur();
       }
-      if (ev.code === "Enter") {
+      if (ev.code === 'Enter') {
         const ctrl = ev.ctrlKey || ev.metaKey;
         if (ctrl) onBlur();
         else setHeight((h) => h + 24);
       }
     };
-    const textarea = editRef.current?.querySelector("textarea");
+    const textarea = editRef.current?.querySelector('textarea');
 
-    textarea?.addEventListener("blur", onBlur);
-    textarea?.addEventListener("keydown", onKey);
-    previewRef.current?.addEventListener("dblclick", onDoubleClick);
+    textarea?.addEventListener('blur', onBlur);
+    textarea?.addEventListener('keydown', onKey);
+    previewRef.current?.addEventListener('dblclick', onDoubleClick);
     return () => {
-      textarea?.removeEventListener("blur", onBlur);
-      textarea?.removeEventListener("keydown", onKey);
-      previewRef.current?.removeEventListener("dblclick", onDoubleClick);
+      textarea?.removeEventListener('blur', onBlur);
+      textarea?.removeEventListener('keydown', onKey);
+      previewRef.current?.removeEventListener('dblclick', onDoubleClick);
     };
   }, [editing, editedMd]);
 
@@ -445,19 +405,19 @@ const Note = ({
     h && setHeight(h);
     setEditedMd(note.text);
     setEditing(true);
-    setTimeout(() => editRef.current?.querySelector("textarea")?.focus(), 50);
+    setTimeout(() => editRef.current?.querySelector('textarea')?.focus(), 50);
   };
 
   const onNoteClick = (ev: MouseEvent) => {
     const tg = ev.target as HTMLInputElement;
-    const isCheckbox = tg.type === "checkbox";
+    const isCheckbox = tg.type === 'checkbox';
     if (!isCheckbox) return;
-    const label = tg.parentNode?.querySelector("label")?.textContent;
+    const label = tg.parentNode?.querySelector('label')?.textContent;
     const reg = new RegExp(`-\\[[x ]\\]\\s+${label}`);
     const match = reg.exec(note.text);
-    if (match === null) throw new Error(" cant find todo in the note");
+    if (match === null) throw new Error(' cant find todo in the note');
     const i = match.index + 2;
-    const toggled = note.text[i] === "x" ? " " : "x";
+    const toggled = note.text[i] === 'x' ? ' ' : 'x';
     const newText = note.text.slice(0, i) + toggled + note.text.slice(i + 1);
     saveNote(note, newText);
   };
@@ -469,11 +429,7 @@ const Note = ({
           <div ref={previewRef} className="px-2">
             <div className="markdown" onClick={onNoteClick}>
               {blocks.map(({ type, items }, i) => (
-                <MarkDownBlock
-                  key={`md-${i}-${type}`}
-                  type={type}
-                  items={items}
-                />
+                <MarkDownBlock key={`md-${i}-${type}`} type={type} items={items} />
               ))}
             </div>
           </div>
@@ -481,11 +437,9 @@ const Note = ({
         {editing && (
           <div ref={editRef}>
             <textarea
-              className={" w-full p-2 max-h-[70vh] "}
+              className={' w-full p-2 max-h-[70vh] '}
               value={editedMd}
-              onInput={(ev) =>
-                setEditedMd((ev.target as HTMLInputElement).value)
-              }
+              onInput={(ev) => setEditedMd((ev.target as HTMLInputElement).value)}
               style={{ height: `${height}px` }}
             />
           </div>
@@ -527,33 +481,27 @@ const Note = ({
   );
 };
 
-const Todo = ({
-  note,
-  saveNote,
-}: {
-  note: NoteBlock;
-  saveNote: (note: Note, newText: string) => void;
-}) => {
-  const todos = note.lines.filter((l) => l.type === "todo");
+const Todo = ({ note, saveNote }: { note: NoteBlock; saveNote: (note: Note, newText: string) => void }) => {
+  const todos = note.lines.filter((l) => l.type === 'todo');
   if (todos.length === 0) return null;
 
   const onClick = (ev: MouseEvent) => {
     const tg = ev.target as HTMLInputElement;
-    const isCheckbox = tg.type === "checkbox";
+    const isCheckbox = tg.type === 'checkbox';
 
     if (!isCheckbox) return;
-    const label = tg.parentNode?.querySelector("label")?.textContent;
+    const label = tg.parentNode?.querySelector('label')?.textContent;
     const reg = new RegExp(`-\\[[x ]\\]\\s+${label}`);
     const match = reg.exec(note.text);
-    if (match === null) throw new Error(" cant find todo in the note");
+    if (match === null) throw new Error(' cant find todo in the note');
     const i = match.index + 2;
-    const toggled = note.text[i] === "x" ? " " : "x";
+    const toggled = note.text[i] === 'x' ? ' ' : 'x';
     const newText = note.text.slice(0, i) + toggled + note.text.slice(i + 1);
     saveNote(note, newText);
   };
 
   return (
-    <NoteCard datestr={note.date} showMonth>
+    <NoteCard datestr={note.date}>
       <ul className="space-y-3" onClick={onClick}>
         {todos.map((item) => (
           <li className="flex items-center gap-2">

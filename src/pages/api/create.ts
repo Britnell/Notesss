@@ -1,13 +1,13 @@
-import type { APIRoute } from "astro";
-import { createNote } from "../../db";
-import { auth } from "../../auth-server";
+import type { APIRoute } from 'astro';
+import { createNote } from '../../db';
+import { auth } from '../../auth-server';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   const { date, text, userId } = await request.json();
 
-  const errResp = new Response("error", {
+  const errResp = new Response('error', {
     status: 400,
   });
 
@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   // TODO - check note date does not exist
 
-  const resp = await createNote({ date, text, userId }).catch(() => {
+  const resp = await createNote({ date, text, userId, updated: Date.now() }).catch(() => {
     return null;
   });
   if (!resp) return errResp;

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
-import { updateNote } from '../../db';
-import { auth } from '../../auth-server';
+import { updateNote } from '../../../db';
+import { auth } from '../../../auth-server';
 
 export const prerender = false;
 

@@ -98,7 +98,7 @@ export default function App(props: { notes: Note[]; user: User }) {
     // optimistic
     setNotes((_notes) => _notes.map((n) => (n.id === editNote.id ? newNote : n)));
 
-    fetch('/api/update', {
+    fetch('/api/note/update', {
       method: 'POST',
       body: JSON.stringify(newNote),
     })
@@ -131,7 +131,7 @@ export default function App(props: { notes: Note[]; user: User }) {
     };
 
     // send
-    fetch('/api/create', {
+    fetch('/api/note/create', {
       method: 'POST',
       body: JSON.stringify(empty),
     })

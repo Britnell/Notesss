@@ -202,7 +202,7 @@ export default function App(props: { notes: Note[]; user: User }) {
         {currentTab === 'notes' && (
           <>
             <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} />
-            <Loader callback={loadMore} />
+            {!search && <Loader callback={loadMore} />}
           </>
         )}
         {currentTab === 'todos' && (

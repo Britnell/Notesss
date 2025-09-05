@@ -1,24 +1,24 @@
 ---
-import Page from '../components/page.astro'
-import App from '../preact/App'
-import { allNotes  } from '../db'
+import Page from '../components/page.astro';
+import App from '../preact/App';
 import { auth } from '../auth-server';
+import { getRecent } from '../db';
 
 const session = await auth.api.getSession({
   headers: Astro.request.headers,
 });
 
-if(!session) {
-	return Astro.redirect('/login')
+if (!session) {
+  return Astro.redirect('/login');
 }
 
-const notes = await allNotes(session?.user.id)
+const notes = await getRecent(session?.user.id, 14);
 const user = {
-	id: session?.user.id,
-	name: session?.user.name,
-}
-
+  id: session?.user.id,
+  name: session?.user.name,
+};
 ---
+
 <Page>
-	<App notes={notes} user={user} client:only />
-</Page> 
+  <App notes={notes} user={user} client:only />
+</Page>

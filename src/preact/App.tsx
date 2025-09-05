@@ -81,6 +81,7 @@ export default function App(props: { notes: Note[]; user: User }) {
     .filter((note) => {
       if (note.text === 'x') return false;
       if (search === '') return true;
+
       // simple search filter
       const match = note.text.indexOf(search);
       return match !== -1;
@@ -118,7 +119,8 @@ export default function App(props: { notes: Note[]; user: User }) {
       return;
     }
     if (existing) {
-      return; // do nothing
+      // do nothing
+      return;
     }
 
     const tempId = Date.now();
@@ -144,8 +146,26 @@ export default function App(props: { notes: Note[]; user: User }) {
       });
 
     // Optimistic creation
-    setNotes((n) => [empty, ...n]);
+    const _next = [...notes, empty].sort((a, b) => {
+      const da = new Date(a.date);
+      const db = new Date(b.date);
+      return db.getTime() - da.getTime();
+    });
+    setNotes(_next);
   }
+
+  const loadMore = async () => {
+    const oldest = notes[notes.length - 1]?.date;
+    console.log({
+      oldest,
+    });
+
+    const resp = await fetch(`/api/list?from=${oldest}`, {})
+      .then((res) => res.json())
+      .catch(() => null);
+
+    if (resp.length > 0) setNotes((n) => [...n, ...resp]);
+  };
 
   return (
     <div class=" max-w-[1200px] mx-auto">
@@ -178,8 +198,13 @@ export default function App(props: { notes: Note[]; user: User }) {
         </div>
       </aside>
 
-      <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-4">
-        {currentTab === 'notes' && <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} />}
+      <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-4 pb-10">
+        {currentTab === 'notes' && (
+          <>
+            <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} />
+            <Loader callback={loadMore} />
+          </>
+        )}
         {currentTab === 'todos' && (
           <>
             {dateBlocks.map((note) => (
@@ -216,6 +241,29 @@ export default function App(props: { notes: Note[]; user: User }) {
     </div>
   );
 }
+
+const Loader = ({ callback }: { callback: () => void }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      const x = entries[0].isIntersecting;
+      if (x) {
+        callback();
+      }
+    }, {});
+    observer.observe(ref.current!);
+    return () => {
+      observer.disconnect();
+    };
+  }, [callback]);
+
+  return (
+    <div ref={ref} className="bg-slate-800 p-2 rounded-lg mb-10">
+      <p className="py-8 text-center">LOADING ...</p>
+    </div>
+  );
+};
 
 const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
   const [open, setOpen] = useState(false);

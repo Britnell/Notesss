@@ -9,7 +9,7 @@ export const notes = sqliteTable(
     id: integer('id').primaryKey(),
     date: text('date').notNull(),
     text: text('text').notNull(),
-    updated: integer('updated', { mode: 'timestamp' }), // .notNull()
+    updated: integer('updated'), // .notNull()
     userId: text('userId')
       .notNull()
       .references(() => user.id),

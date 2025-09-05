@@ -11,10 +11,20 @@ export const createNote = (data: { date: string; text: string; userId: string; u
     .returning()
     .then((res) => res[0]);
 
-export const updateNote = ({ text, userId, id }: { id: number; text: string; userId: string; updated: number }) =>
+export const updateNote = ({
+  text,
+  userId,
+  id,
+  updated,
+}: {
+  id: number;
+  text: string;
+  userId: string;
+  updated: number;
+}) =>
   db
     .update(notes)
-    .set({ text })
+    .set({ text, updated })
     .where(and(eq(notes.userId, userId), eq(notes.id, id)))
     .returning()
     .then((res) => res[0]);

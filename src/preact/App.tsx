@@ -126,6 +126,7 @@ export default function App(props: { notes: Note[]; user: User }) {
       id: tempId,
       date: createDate,
       text: '',
+      updated: 0,
       userId,
     };
 

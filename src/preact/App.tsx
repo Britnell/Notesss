@@ -173,7 +173,7 @@ export default function App(props: Props) {
   return (
     <div class=" max-w-[1200px] mx-auto">
       {!demo && (
-        <header className="flex py-2 px-6 bg-slate-800 justify-between">
+        <header className="flex py-2 px-6 bg-slate-900 justify-between">
           <span>Notesss</span>
           <div className=" border border-white px-2 py-1 ">
             <span className=" pr-2">?</span>
@@ -378,7 +378,7 @@ const MonthBlock = ({ date, children }: { date: string; children: VNode | VNode[
   const [y, m] = date.split('-');
   return (
     <div key={y + m} className="month">
-      <h3 className=" text-xl text-right sticky top-0 z-10 py-2 bg-slate-900">
+      <h3 className=" text-xl text-right sticky top-0 z-10 py-2 bg-slate-950">
         {months[m]} {y}
       </h3>
       <div className=" space-y-4">{children}</div>
@@ -419,7 +419,7 @@ export const NoteCard = ({
         </div>
         {showMonth && <span className=" ml-4">{months[date.getMonth() + 1]}</span>}
       </h3>
-      <div className=" relative bg-slate-800 p-2 rounded-lg ">{children}</div>
+      <div className=" relative bg-slate-900 p-2 rounded-lg ">{children}</div>
     </div>
   );
 };

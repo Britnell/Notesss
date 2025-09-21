@@ -10,6 +10,7 @@ import {
   type MdxLine,
 } from './MarkDown';
 import type { VNode } from 'preact';
+import { days, months, tabs } from '../lib/helper';
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -31,34 +32,7 @@ type Habit = {
   value?: number;
 };
 
-const tabs = ['notes', 'todos', 'habits', 'links'];
-
-const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-
-const months: Record<string, string> = {
-  '01': 'Jan',
-  '02': 'Feb',
-  '03': 'Mar',
-  '04': 'Apr',
-  '05': 'May',
-  '06': 'Jun',
-  '07': 'Jul',
-  '08': 'Aug',
-  '09': 'Sep',
-  '10': 'Oct',
-  '11': 'Nov',
-  '12': 'Dec',
-  1: 'Jan',
-  2: 'Feb',
-  3: 'Mar',
-  4: 'Apr',
-  5: 'May',
-  6: 'Jun',
-  7: 'Jul',
-  8: 'Aug',
-  9: 'Sep',
-};
-
+type Tab = (typeof tabs)[number];
 type User = {
   id: string;
   name: string;
@@ -69,7 +43,7 @@ type Props = { notes: Note[]; user: User; demo?: boolean };
 export default function App(props: Props) {
   const demo = props.demo ?? false;
   const [notes, setNotes] = useState(props.notes);
-  const [currentTab, setCurrentTab] = useState(tabs[0]);
+  const [currentTab, setCurrentTab] = useState<Tab>(tabs[0]);
   const [search, setSearch] = useState('');
 
   const dateBlocks = notes
@@ -118,6 +92,7 @@ export default function App(props: Props) {
     // reset deleted note
     const existing = notes.find((n) => n.date === createDate);
     if (existing?.text === 'x') {
+      setCurrentTab('notes');
       setNotes((n) => n.map((note) => (note.id === existing.id ? { ...note, text: '' } : note)));
       return;
     }
@@ -189,30 +164,6 @@ export default function App(props: Props) {
         </header>
       )}
 
-      <aside className=" fixed z-10 bottom-0 md:bottom-20 right-2 left-0 md:left-auto md:top-[50px] md:w-10 h-10 md:h-auto ">
-        <div className=" h-full flex md:flex-col justify-center gap-1 md:gap-3">
-          {tabs.map((tab) => (
-            <button
-              className={
-                ' aspect-square text-xs p-[2px] flex justify-center items-center border-none rounded-md' +
-                (tab === currentTab ? ' bg-white text-slate-800' : ' bg-slate-900')
-              }
-              onClick={() => setCurrentTab(tab)}
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                class={tab === currentTab ? ' fill-slate-800 ' : ' fill-white '}
-              >
-                <use href={`#${tab}`}></use>
-              </svg>
-            </button>
-          ))}
-          {!demo && <AddButton addNote={addNote} />}
-        </div>
-      </aside>
-
       <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-4 pb-10">
         {currentTab === 'notes' && (
           <>
@@ -253,6 +204,30 @@ export default function App(props: Props) {
           </div>
         )}
       </main>
+
+      <aside className=" fixed z-10 bottom-0 md:bottom-20 right-2 left-0 md:left-auto md:top-[50px] md:w-10 h-12 md:h-auto bg-slate-900 md:bg-transparent  py-1">
+        <div className=" h-full flex md:flex-col justify-center gap-2 md:gap-2 ">
+          {tabs.map((tab) => (
+            <button
+              className={
+                ' aspect-square text-xs p-[2px] flex justify-center items-center border-none rounded-md' +
+                (tab === currentTab ? ' bg-white text-slate-800' : ' bg-slate-800')
+              }
+              onClick={() => setCurrentTab(tab)}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                class={tab === currentTab ? ' fill-slate-800 ' : ' fill-white '}
+              >
+                <use href={`#${tab}`}></use>
+              </svg>
+            </button>
+          ))}
+          {!demo && <AddButton addNote={addNote} />}
+        </div>
+      </aside>
     </div>
   );
 }
@@ -300,14 +275,14 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
       {/* {!open && ( */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="border-none rounded-md w-full aspect-square p-[2px]  bg-slate-900"
+        className="border-none rounded-md w-full aspect-square p-[2px]  bg-slate-800"
       >
         {open ? 'x' : '+'}
       </button>
       {/* )} */}
       {open && (
         <form onSubmit={onSubmit}>
-          <div className="absolute flex gap-2 z-20 right-0 md:right-[calc(100%+8px)] bottom-[calc(100%+4px)] md:bottom-auto md:top-0 bg-slate-700 p-2 rounded-md">
+          <div className="absolute flex gap-2 z-20 right-0 md:right-[calc(100%+8px)] bottom-[calc(100%+4px)] md:bottom-auto md:top-0 bg-slate-700 p-[6px] rounded-md">
             <button className="text-xs" type="button" onClick={() => step(-1)}>
               {'<'}
             </button>
@@ -379,7 +354,7 @@ const MonthBlock = ({ date, children }: { date: string; children: VNode | VNode[
   return (
     <div key={y + m} className="month">
       <h3 className=" text-xl text-right sticky top-0 z-10 py-2 bg-slate-950">
-        {months[m]} {y}
+        {months[m]} {y.slice(2)}
       </h3>
       <div className=" space-y-4">{children}</div>
     </div>
@@ -411,7 +386,7 @@ export const NoteCard = ({
   let col = d === 0 ? 7 : d;
   return (
     <div className=" card relative ">
-      <h3 className=" text-xl mb-1 sticky top-0 z-10 py-2 grid grid-cols-7 max-w-[500px] ">
+      <h3 className=" text-xl mb-1 sticky top-0 z-10 py-2 sm:grid sm:grid-cols-7 max-w-[500px]">
         <div style={{ gridColumnStart: col }}>
           <span className="mr-2">{weekday}</span>
           <span>{nth}</span>

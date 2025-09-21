@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import type { Note } from '../db/schema';
+import { notes, type Note } from '../db/schema';
 import {
   extractMdHabits,
   extractMdLines,
@@ -133,9 +133,6 @@ export default function App(props: Props) {
 
   const loadMore = async () => {
     const oldest = notes[notes.length - 1]?.date;
-    console.log({
-      oldest,
-    });
 
     const resp = await fetch(`/api/list?from=${oldest}`, {})
       .then((res) => res.json())
@@ -170,13 +167,7 @@ export default function App(props: Props) {
             {!search && !demo && <Loader callback={loadMore} />}
           </>
         )}
-        {currentTab === 'todos' && (
-          <>
-            {dateBlocks.map((note) => (
-              <Todo key={note.date} note={note} saveNote={saveNote} />
-            ))}
-          </>
-        )}
+        {currentTab === 'todos' && <Todos blocks={dateBlocks} saveNote={saveNote} />}
         {currentTab === 'links' && (
           <div>
             {dateBlocks.map((note) => (
@@ -219,6 +210,8 @@ export default function App(props: Props) {
 }
 
 function Habits({ blocks }: { blocks: NoteBlock[] }) {
+  //  blocks.map((bl) => bl.habits.length);
+
   return (
     <>
       {blocks.map((note, n) => {
@@ -278,16 +271,16 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
     tomorrow.setDate(tomorrow.getDate() + d);
     setDate(tomorrow.toISOString().split('T')[0]);
   };
+
   return (
     <div className="relative aspect-square">
-      {/* {!open && ( */}
       <button
         onClick={() => setOpen((o) => !o)}
         className="border-none rounded-md w-full aspect-square p-[2px]  bg-slate-800"
       >
         {open ? 'x' : '+'}
       </button>
-      {/* )} */}
+
       {open && (
         <form onSubmit={onSubmit}>
           <div className="absolute flex gap-2 z-20 right-0 md:right-[calc(100%+8px)] bottom-[calc(100%+4px)] md:bottom-auto md:top-0 bg-slate-700 p-[6px] rounded-md">
@@ -304,9 +297,6 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
               className=" bg-transparent w-32"
             />
             <button type="submit">+</button>
-            {/* <button type="button" className=" size-8   " onClick={() => setOpen(false)}>
-              x
-            </button> */}
           </div>
         </form>
       )}
@@ -335,35 +325,45 @@ const Link = ({ note }: { note: NoteBlock }) => {
   );
 };
 
-const Todo = ({ note, saveNote }: { note: NoteBlock; saveNote: (note: Note, newText: string) => void }) => {
-  const todos = note.lines.filter((l) => l.type === 'todo');
-  if (todos.length === 0) return null;
+function Todos({ blocks, saveNote }: { blocks: NoteBlock[]; saveNote: (note: Note, newText: string) => void }) {
+  const notEmpty = blocks.map((bl) => bl.lines.filter((l) => l.type === 'todo').length).some((n) => n > 0);
 
-  const onClick = (ev: MouseEvent) => {
+  function onClick(ev: MouseEvent, note: NoteBlock) {
     const tg = ev.target as HTMLInputElement;
     const isCheckbox = tg.type === 'checkbox';
-
     if (!isCheckbox) return;
+
     const label = tg.parentNode?.querySelector('label')?.textContent;
     const reg = new RegExp(`-\\[[x ]\\]\\s+${label}`);
     const match = reg.exec(note.text);
     if (match === null) throw new Error(' cant find todo in the note');
+
     const i = match.index + 2;
     const toggled = note.text[i] === 'x' ? ' ' : 'x';
     const newText = note.text.slice(0, i) + toggled + note.text.slice(i + 1);
     saveNote(note, newText);
-  };
+  }
 
   return (
-    <NoteCard datestr={note.date}>
-      <ul className="space-y-3" onClick={onClick}>
-        {todos.map((item) => (
-          <li className="flex items-center gap-2">
-            <input type="checkbox" checked={item.done} className="" />
-            <label>{item.text}</label>
-          </li>
-        ))}
-      </ul>
-    </NoteCard>
+    <>
+      {!notEmpty && <p className="text-center">No todos found</p>}
+
+      {blocks.map((note) => {
+        const todos = note.lines.filter((l) => l.type === 'todo');
+        if (todos.length === 0) return null;
+        return (
+          <NoteCard datestr={note.date}>
+            <ul className="space-y-3" onClick={(ev) => onClick(ev, note)}>
+              {todos.map((item) => (
+                <li className="flex items-center gap-2">
+                  <input type="checkbox" checked={item.done} className="" />
+                  <label>{item.text}</label>
+                </li>
+              ))}
+            </ul>
+          </NoteCard>
+        );
+      })}
+    </>
   );
-};
+}

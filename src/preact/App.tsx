@@ -45,6 +45,7 @@ export default function App(props: Props) {
   const [currentTab, setCurrentTab] = useState<Tab>(tabs[0]);
   const [search, setSearch] = useState('');
 
+  const userId = props.user.id;
   const dateBlocks = notes
     .map((n) => ({
       ...n,
@@ -67,7 +68,6 @@ export default function App(props: Props) {
       const db = new Date(b.date);
       return db.getTime() - da.getTime();
     });
-  const userId = props.user.id;
 
   function saveNote(editNote: Note, newText: string) {
     const newNote = { ...editNote, text: newText };
@@ -141,6 +141,14 @@ export default function App(props: Props) {
     if (resp.length > 0) setNotes((n) => [...n, ...resp]);
   };
 
+  const jumpTo = (date: string) => {
+    setCurrentTab('notes');
+    setTimeout(() => {
+      const el = document.getElementById(date);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 10);
+  };
+
   return (
     <div class=" max-w-[1200px] mx-auto">
       {!demo && (
@@ -175,7 +183,7 @@ export default function App(props: Props) {
         )}
         {currentTab === 'habits' && (
           <div className=" ">
-            <Habits blocks={dateBlocks} />
+            <Habits blocks={dateBlocks} jumpTo={jumpTo} />
           </div>
         )}
       </main>
@@ -207,7 +215,7 @@ export default function App(props: Props) {
   );
 }
 
-function Habits({ blocks }: { blocks: NoteBlock[] }) {
+function Habits({ blocks, jumpTo }: { blocks: NoteBlock[]; jumpTo: (date: string) => void }) {
   return (
     <>
       {blocks.map((note, n) => {
@@ -222,6 +230,9 @@ function Habits({ blocks }: { blocks: NoteBlock[] }) {
                 </span>
               ))}
             </div>
+            <button onClick={() => jumpTo(note.date)} className="absolute right-2 top-2">
+              goto
+            </button>
           </NoteCard>
         );
       })}

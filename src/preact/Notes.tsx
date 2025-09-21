@@ -211,8 +211,8 @@ export const NoteCard = ({
   const weekday = days[d];
   let col = d === 0 ? 7 : d;
   return (
-    <div className=" card relative ">
-      <h3 className=" text-xl mb-1 sticky top-0 z-10 py-2 sm:grid sm:grid-cols-7 max-w-[500px]">
+    <div id={datestr} className="relative">
+      <h3 className="text-xl mb-1 sticky top-0 z-10 py-2 sm:grid sm:grid-cols-7 max-w-[500px]">
         <div style={{ gridColumnStart: col }}>
           <span className="mr-2">{weekday}</span>
           <span>{nth}</span>
@@ -220,7 +220,7 @@ export const NoteCard = ({
         </div>
         {showMonth && <span className=" ml-4">{months[date.getMonth() + 1]}</span>}
       </h3>
-      <div className=" relative bg-slate-900 p-2 rounded-lg ">{children}</div>
+      <div className="relative bg-slate-900 p-2 rounded-lg ">{children}</div>
     </div>
   );
 };

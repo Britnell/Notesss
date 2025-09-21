@@ -8,7 +8,7 @@ export function pipe(x: any, ...fns: ((x: any) => any)[]) {
   return fns.reduce((v, f) => f(v), x);
 }
 
-export const tabs = ['notes', 'todos', 'habits', 'links'];
+export const tabs = ['notes', 'todos', 'habits', 'links'] as const;
 
 export const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 

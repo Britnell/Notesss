@@ -10,6 +10,7 @@ import {
   type MdxLine,
 } from './MarkDown';
 import type { VNode } from 'preact';
+import { useSync } from '../lib/usesync';
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -68,6 +69,8 @@ export default function App(props: { notes: Note[]; user: User }) {
   const [notes, setNotes] = useState(props.notes);
   const [currentTab, setCurrentTab] = useState(tabs[0]);
   const [search, setSearch] = useState('');
+
+  useSync();
 
   const dateBlocks = notes
     .map((n) => ({

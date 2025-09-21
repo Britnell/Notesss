@@ -1,4 +1,4 @@
-import { and, desc, eq, lt } from 'drizzle-orm';
+import { and, desc, eq, gt, inArray, lt } from 'drizzle-orm';
 import { notes } from './schema';
 import { db, tursoClient } from './turso';
 
@@ -41,3 +41,22 @@ export const getRecentAfter = (uid: string, from: string, n: number) =>
     .where(and(eq(notes.userId, uid), lt(notes.date, from)))
     .orderBy(desc(notes.date))
     .limit(n);
+
+export const checkCache = (uid: string, from: string, n: number) =>
+  db
+    .select({
+      id: notes.id,
+      date: notes.date,
+      updated: notes.updated,
+    })
+    .from(notes)
+    .where(and(eq(notes.userId, uid), lt(notes.date, from)))
+    .orderBy(desc(notes.date))
+    .limit(n);
+
+export const getNotesByIds = (uid: string, ids: number[]) =>
+  db
+    .select()
+    .from(notes)
+    .where(and(eq(notes.userId, uid), inArray(notes.id, ids)))
+    .orderBy(desc(notes.date));

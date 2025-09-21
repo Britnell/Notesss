@@ -2,6 +2,8 @@
 //   return (x: T) => fns.reduce((v, f) => f(v), x);
 // }
 
+import type { MdxLine } from '../preact/MarkDown';
+
 export function pipe(x: any, ...fns: ((x: any) => any)[]) {
   return fns.reduce((v, f) => f(v), x);
 }
@@ -33,3 +35,38 @@ export const months: Record<string, string> = {
   8: 'Aug',
   9: 'Sep',
 };
+
+export const getDayNth = (day: number) => {
+  if (day > 10 && day < 20) return 'th';
+  const dig = day % 10;
+  if (dig === 1) return 'st';
+  if (dig === 2) return 'nd';
+  if (dig === 3) return 'rd';
+  return 'th';
+};
+
+type MdxBlock = {
+  type: string;
+  items: MdxLine[];
+};
+
+export const groupLineBlocks = (lines: MdxLine[]) => {
+  const blocks: MdxBlock[] = [];
+
+  lines.forEach((line, l) => {
+    if (l === 0) {
+      blocks.push({ type: line.type, items: [line] });
+      return;
+    }
+    const lastLine = blocks[blocks.length - 1];
+    if (line.type === lastLine.type) {
+      lastLine.items.push(line);
+    } else {
+      blocks.push({ type: line.type, items: [line] });
+    }
+  });
+
+  return blocks;
+};
+
+export const getToday = () => new Date().toISOString().split('T')[0];

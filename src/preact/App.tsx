@@ -145,7 +145,14 @@ export default function App(props: Props) {
     setCurrentTab('notes');
     setTimeout(() => {
       const el = document.getElementById(date);
-      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!el) return;
+
+      const rect = el.getBoundingClientRect();
+      const targetPos = window.scrollY + rect.top - 200;
+      window.scrollTo({ top: targetPos, behavior: 'auto' });
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
     }, 10);
   };
 

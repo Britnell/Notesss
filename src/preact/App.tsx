@@ -170,9 +170,7 @@ export default function App(props: Props) {
         {currentTab === 'todos' && <Todos blocks={dateBlocks} saveNote={saveNote} />}
         {currentTab === 'links' && (
           <div>
-            {dateBlocks.map((note) => (
-              <Link key={note.date} note={note} />
-            ))}
+            <Links blocks={dateBlocks} />
           </div>
         )}
         {currentTab === 'habits' && (
@@ -210,8 +208,6 @@ export default function App(props: Props) {
 }
 
 function Habits({ blocks }: { blocks: NoteBlock[] }) {
-  //  blocks.map((bl) => bl.habits.length);
-
   return (
     <>
       {blocks.map((note, n) => {
@@ -304,26 +300,32 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
   );
 };
 
-const Link = ({ note }: { note: NoteBlock }) => {
-  if (note.links.length === 0) return null;
-
+function Links({ blocks }: { blocks: NoteBlock[] }) {
   return (
-    <NoteCard datestr={note.date}>
-      <ul className="space-y-3 list-disc ml-6">
-        {note.links.map((l) => (
-          <li>
-            <a href={l.href} target="_blank" rel="noopener noreferrer" class=" hover:underline">
-              <span className="x">{l.text}</span>
-              <span className="mt- block text-sm text-slate-400 flex-auto text-ellipsis whitespace-pre overflow-hidden">
-                {l.href}
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    </NoteCard>
+    <>
+      {blocks.map((note) => {
+        if (note.links.length === 0) return null;
+
+        return (
+          <NoteCard datestr={note.date}>
+            <ul className="space-y-3 list-disc ml-6">
+              {note.links.map((l) => (
+                <li>
+                  <a href={l.href} target="_blank" rel="noopener noreferrer" class=" hover:underline">
+                    <span className="x">{l.text}</span>
+                    <span className="mt- block text-sm text-slate-400 flex-auto text-ellipsis whitespace-pre overflow-hidden">
+                      {l.href}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </NoteCard>
+        );
+      })}
+    </>
   );
-};
+}
 
 function Todos({ blocks, saveNote }: { blocks: NoteBlock[]; saveNote: (note: Note, newText: string) => void }) {
   const notEmpty = blocks.map((bl) => bl.lines.filter((l) => l.type === 'todo').length).some((n) => n > 0);

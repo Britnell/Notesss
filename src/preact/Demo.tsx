@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
-import App, { groupLineBlocks } from './App';
+import App from './App';
 import { extractMdHabits, extractMdLines, extractMdMentions, extractMdTags, MarkDownBlock } from './MarkDown';
+import { groupLineBlocks } from '../lib/helper';
 
 export default function Demo() {
   const data = [

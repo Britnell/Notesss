@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Note } from '../db/schema';
 import {
   extractMdHabits,
+  extractMdLines,
   extractMdLinks,
   extractMdMentions,
   extractMdTags,
   MarkDownBlock,
-  parseMdLine,
   type MdxLine,
 } from './MarkDown';
 import type { VNode } from 'preact';
@@ -64,7 +64,10 @@ type User = {
   name: string;
 };
 
-export default function App(props: { notes: Note[]; user: User }) {
+type Props = { notes: Note[]; user: User; demo?: boolean };
+
+export default function App(props: Props) {
+  const demo = props.demo ?? false;
   const [notes, setNotes] = useState(props.notes);
   const [currentTab, setCurrentTab] = useState(tabs[0]);
   const [search, setSearch] = useState('');
@@ -72,7 +75,7 @@ export default function App(props: { notes: Note[]; user: User }) {
   const dateBlocks = notes
     .map((n) => ({
       ...n,
-      lines: n.text.split('\n').map((l) => parseMdLine(l)),
+      lines: extractMdLines(n.text),
       tags: extractMdTags(n.text),
       mentions: extractMdMentions(n.text),
       habits: extractMdHabits(n.text),
@@ -169,20 +172,22 @@ export default function App(props: { notes: Note[]; user: User }) {
 
   return (
     <div class=" max-w-[1200px] mx-auto">
-      <header className="flex py-2 px-6 bg-slate-800 justify-between">
-        <span>Notesss</span>
-        <div className=" border border-white px-2 py-1 ">
-          <span className=" pr-2">?</span>
-          <input
-            name="q"
-            className=" bg-transparent text-white"
-            placeholder="search.."
-            value={search}
-            onInput={(e) => setSearch((e.target as HTMLInputElement)?.value)}
-          />
-        </div>
-        <a href="/logout">logout</a>
-      </header>
+      {!demo && (
+        <header className="flex py-2 px-6 bg-slate-800 justify-between">
+          <span>Notesss</span>
+          <div className=" border border-white px-2 py-1 ">
+            <span className=" pr-2">?</span>
+            <input
+              name="q"
+              className=" bg-transparent text-white"
+              placeholder="search.."
+              value={search}
+              onInput={(e) => setSearch((e.target as HTMLInputElement)?.value)}
+            />
+          </div>
+          <a href="/logout">logout</a>
+        </header>
+      )}
 
       <aside className=" fixed z-10 right-0 bottom-0 top-[50px] w-18 pb-20">
         <div className=" h-full p-3 flex flex-col justify-center gap-3">
@@ -194,15 +199,15 @@ export default function App(props: { notes: Note[]; user: User }) {
               {tab}
             </button>
           ))}
-          <AddButton addNote={addNote} />
+          {!demo && <AddButton addNote={addNote} />}
         </div>
       </aside>
 
       <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-4 pb-10">
         {currentTab === 'notes' && (
           <>
-            <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} />
-            {!search && <Loader callback={loadMore} />}
+            <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} demo={demo} />
+            {!search && !demo && <Loader callback={loadMore} />}
           </>
         )}
         {currentTab === 'todos' && (
@@ -307,10 +312,12 @@ const Notes = ({
   blocks,
   saveNote,
   addNote,
+  demo,
 }: {
   blocks: NoteBlock[];
   saveNote: (note: Note, newText: string) => void;
   addNote: (date: string) => void;
+  demo: boolean;
 }) => {
   const missingTodays = blocks.findIndex((n) => n.date === today) === -1;
 
@@ -325,7 +332,7 @@ const Notes = ({
 
   return (
     <>
-      {missingTodays && (
+      {missingTodays && !demo && (
         <div className="">
           <div>{today}</div>
           <button className=" border border-white" onClick={() => addNote(today)}>
@@ -364,7 +371,8 @@ const getDayNth = (day: number) => {
   if (dig === 3) return 'rd';
   return 'th';
 };
-const NoteCard = ({
+
+export const NoteCard = ({
   datestr,
   children,
   showMonth = false,
@@ -568,7 +576,7 @@ type MdxBlock = {
   items: MdxLine[];
 };
 
-const groupLineBlocks = (lines: MdxLine[]) => {
+export const groupLineBlocks = (lines: MdxLine[]) => {
   const blocks: MdxBlock[] = [];
 
   lines.forEach((line, l) => {

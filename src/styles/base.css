@@ -45,6 +45,9 @@ body {
     & :is(b, a, i) {
       @apply text-gray-50;
     }
+    & :is(h2, h3, h4) {
+      @apply text-gray-50 font-medium;
+    }
 
     & > p {
       /* white-space: pre; */

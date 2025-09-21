@@ -432,9 +432,11 @@ const Link = ({ note }: { note: NoteBlock }) => {
       <ul className="space-y-3 list-disc ml-6">
         {note.links.map((l) => (
           <li>
-            <a className="underline w-full flex " href={l.href} target="_blank" rel="noopener noreferrer">
-              <span className="capitalize">{l.text}</span> : &nbsp;&nbsp;&nbsp;
-              <span className=" flex-auto text-ellipsis">{l.href}</span>
+            <a href={l.href} target="_blank" rel="noopener noreferrer" class=" hover:underline">
+              <span className="x">{l.text}</span>
+              <span className="mt- block text-sm text-slate-400 flex-auto text-ellipsis whitespace-pre overflow-hidden">
+                {l.href}
+              </span>
             </a>
           </li>
         ))}

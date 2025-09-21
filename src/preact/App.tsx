@@ -186,20 +186,7 @@ export default function App(props: Props) {
         )}
         {currentTab === 'habits' && (
           <div className=" ">
-            {dateBlocks.map((note) => {
-              if (note.habits.length === 0) return null;
-              return (
-                <NoteCard datestr={note.date}>
-                  <div className="">
-                    {note.habits.map((h) => (
-                      <span key={h}>
-                        {h.name} {h.value}
-                      </span>
-                    ))}
-                  </div>
-                </NoteCard>
-              );
-            })}
+            <Habits blocks={dateBlocks} />
           </div>
         )}
       </main>
@@ -228,6 +215,28 @@ export default function App(props: Props) {
         </div>
       </aside>
     </div>
+  );
+}
+
+function Habits({ blocks }: { blocks: NoteBlock[] }) {
+  return (
+    <>
+      {blocks.map((note, n) => {
+        if (note.habits.length === 0) return null;
+        return (
+          <NoteCard key={n} datestr={note.date}>
+            <div className="flex gap-4">
+              {note.habits.map((h) => (
+                <span key={h}>
+                  {h.name}
+                  <span className="ml-1 text-sm">{h.value}</span>
+                </span>
+              ))}
+            </div>
+          </NoteCard>
+        );
+      })}
+    </>
   );
 }
 

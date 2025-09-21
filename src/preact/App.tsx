@@ -189,14 +189,24 @@ export default function App(props: Props) {
         </header>
       )}
 
-      <aside className=" fixed z-10 right-0 bottom-0 top-[50px] w-18 pb-20">
-        <div className=" h-full p-3 flex flex-col justify-center gap-3">
+      <aside className=" fixed z-10 bottom-0 md:bottom-20 right-2 left-0 md:left-auto md:top-[50px] md:w-10 h-10 md:h-auto ">
+        <div className=" h-full flex md:flex-col justify-center gap-1 md:gap-3">
           {tabs.map((tab) => (
             <button
-              className={' aspect-square text-xs p-[2px] ' + (tab === currentTab ? ' bg-white text-slate-800' : '')}
+              className={
+                ' aspect-square text-xs p-[2px] flex justify-center items-center border-none rounded-md' +
+                (tab === currentTab ? ' bg-white text-slate-800' : ' bg-slate-900')
+              }
               onClick={() => setCurrentTab(tab)}
             >
-              {tab}
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                class={tab === currentTab ? ' fill-slate-800 ' : ' fill-white '}
+              >
+                <use href={`#${tab}`}></use>
+              </svg>
             </button>
           ))}
           {!demo && <AddButton addNote={addNote} />}
@@ -279,28 +289,41 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
     addNote(date);
     setOpen(false);
   };
+
+  const step = (d: number) => {
+    const tomorrow = new Date(date);
+    tomorrow.setDate(tomorrow.getDate() + d);
+    setDate(tomorrow.toISOString().split('T')[0]);
+  };
   return (
-    <div className="relative ">
-      {!open && (
-        <button onClick={() => setOpen(true)} className=" w-full aspect-square text-xs p-[2px] ">
-          +
-        </button>
-      )}
+    <div className="relative aspect-square">
+      {/* {!open && ( */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="border-none rounded-md w-full aspect-square p-[2px]  bg-slate-900"
+      >
+        {open ? 'x' : '+'}
+      </button>
+      {/* )} */}
       {open && (
         <form onSubmit={onSubmit}>
-          <div className="absolute right-0  flex gap-2 z-20 ">
-            <div className="">
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate((e.target as HTMLInputElement)?.value)}
-                className=""
-              />
-            </div>
-            <button type="submit">+</button>
-            <button type="button" className=" size-8   " onClick={() => setOpen(false)}>
-              x
+          <div className="absolute flex gap-2 z-20 right-0 md:right-[calc(100%+8px)] bottom-[calc(100%+4px)] md:bottom-auto md:top-0 bg-slate-700 p-2 rounded-md">
+            <button className="text-xs" type="button" onClick={() => step(-1)}>
+              {'<'}
             </button>
+            <button className="text-xs" type="button" onClick={() => step(1)}>
+              {'>'}
+            </button>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate((e.target as HTMLInputElement)?.value)}
+              className=" bg-transparent w-32"
+            />
+            <button type="submit">+</button>
+            {/* <button type="button" className=" size-8   " onClick={() => setOpen(false)}>
+              x
+            </button> */}
           </div>
         </form>
       )}

@@ -12,7 +12,7 @@ import {
   regTodo,
   regMention,
   regMentions,
-} from "../lib/regex";
+} from '../lib/regex';
 
 export type MdxLine = {
   type: string;
@@ -21,16 +21,10 @@ export type MdxLine = {
   level?: number;
 };
 
-export const MarkDownBlock = ({
-  type,
-  items,
-}: {
-  type: string;
-  items: MdxLine[];
-}) => {
+export const MarkDownBlock = ({ type, items }: { type: string; items: MdxLine[] }) => {
   // PARSE
   switch (type) {
-    case "heading":
+    case 'heading':
       return (
         <>
           {items.map((it) => {
@@ -42,7 +36,7 @@ export const MarkDownBlock = ({
           })}
         </>
       );
-    case "p":
+    case 'p':
       return (
         <p>
           {items.map((it) => (
@@ -50,7 +44,7 @@ export const MarkDownBlock = ({
           ))}
         </p>
       );
-    case "list":
+    case 'list':
       return (
         <ul>
           {items.map((it, i) => (
@@ -58,7 +52,7 @@ export const MarkDownBlock = ({
           ))}
         </ul>
       );
-    case "todo":
+    case 'todo':
       return (
         <ul className=" list-none ml-1 ">
           {items.map((it, i) => (
@@ -72,7 +66,7 @@ export const MarkDownBlock = ({
     default:
       return (
         <p>
-          Unknown block {type} {items.map((it) => it.text).join(";")}
+          Unknown block {type} {items.map((it) => it.text).join(';')}
         </p>
       );
   }
@@ -82,11 +76,7 @@ export const MdText = ({ md }: { md: string }) => {
   let parsing = md;
 
   // parse [links](...)
-  parsing = mdParseLoop(
-    parsing,
-    regLink,
-    (match) => `<a href="${match[2]}">${match[1]}</a>`
-  );
+  parsing = mdParseLoop(parsing, regLink, (match) => `<a href="${match[2]}">${match[1]}</a>`);
 
   // parse **bold** and *italic*
   parsing = mdParseLoop(parsing, regBold, (match) => `<b>${match[1]}</b>`);
@@ -97,7 +87,7 @@ export const MdText = ({ md }: { md: string }) => {
     parsing,
     regTag,
     (match) =>
-      `<span class="font-semibold px-1 py-[2px] rounded bg-slate-900 text-white "><span>#</span>${match[1]}</span>`
+      `<span class="font-medium mx- px-[4px] py-[2px] rounded bg-slate-900 text-white "><span>#</span>${match[1]}</span>`,
   );
 
   // parse @mention
@@ -105,7 +95,7 @@ export const MdText = ({ md }: { md: string }) => {
     parsing,
     regMention,
     (match) =>
-      `<span class="font-semibold px-1 py-[2px] rounded bg-slate-900 text-white "><span>@</span>${match[1]}</span>`
+      `<span class="font-medium mx- px-[4px] py-[2px] rounded bg-slate-900 text-white "><span>@</span>${match[1]}</span>`,
   );
 
   // parse [habit]
@@ -113,22 +103,13 @@ export const MdText = ({ md }: { md: string }) => {
     parsing,
     regHabit,
     (match) =>
-      `<span class="font-semibold px-1 py-[2px] rounded bg-slate-900 text-white ">${match[1]}${match[2]}</span>`
+      `<span class="font-medium mx- px-[4px] py-[2px] rounded bg-slate-900 text-white ">${match[1]}${match[2]}</span>`,
   );
 
-  return (
-    <span
-      className="block"
-      dangerouslySetInnerHTML={{ __html: parsing }}
-    ></span>
-  );
+  return <span className="block" dangerouslySetInnerHTML={{ __html: parsing }}></span>;
 };
 
-const mdParseLoop = (
-  md: string,
-  regex: RegExp,
-  parsedInsertCallback: (match: RegExpMatchArray) => string
-) => {
+const mdParseLoop = (md: string, regex: RegExp, parsedInsertCallback: (match: RegExpMatchArray) => string) => {
   let parsing = md;
   let match;
   match = parsing.match(regex);
@@ -141,7 +122,9 @@ const mdParseLoop = (
   return parsing;
 };
 
-export const parseMdLine = (line: string) => {
+export const extractMdLines = (md: string) => md.split('\n').map((l) => parseMdLine(l));
+
+const parseMdLine = (line: string) => {
   const isheading = line.match(regHeading);
   if (isheading) {
     return {
@@ -154,34 +137,32 @@ export const parseMdLine = (line: string) => {
   const istodo = line.match(regTodo);
   if (istodo)
     return {
-      type: "todo",
+      type: 'todo',
       text: istodo[2],
-      done: istodo[1] === "x",
+      done: istodo[1] === 'x',
     };
 
   const islist = line.match(regList);
   if (islist)
     return {
-      type: "list",
+      type: 'list',
       text: islist[1],
     };
 
   return {
-    type: "p",
+    type: 'p',
     text: line,
   };
 };
 
-export const extractMdTags = (md: string) =>
-  [...md.matchAll(regTags)].map((match) => match[0].trim());
+export const extractMdTags = (md: string) => [...md.matchAll(regTags)].map((match) => match[0].trim());
 
-export const extractMdMentions = (md: string) =>
-  [...md.matchAll(regMentions)].map((match) => match[0].trim());
+export const extractMdMentions = (md: string) => [...md.matchAll(regMentions)].map((match) => match[0].trim());
 
 export const extractMdHabits = (md: string) => {
   const matches = [...md.matchAll(regHabits)];
   return matches.map((match) => ({
-    type: "habit" as const,
+    type: 'habit' as const,
     name: match[1],
     value: parseInt(match[2]) || undefined,
   }));

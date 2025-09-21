@@ -2,15 +2,16 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Note } from '../db/schema';
 import {
   extractMdHabits,
+  extractMdLines,
   extractMdLinks,
   extractMdMentions,
   extractMdTags,
   MarkDownBlock,
-  parseMdLine,
   type MdxLine,
 } from './MarkDown';
 import type { VNode } from 'preact';
 import { useSync } from '../lib/usesync';
+import { days, months, tabs } from '../lib/helper';
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -32,42 +33,18 @@ type Habit = {
   value?: number;
 };
 
-const tabs = ['notes', 'todos', 'habits', 'links'];
-
-const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-
-const months: Record<string, string> = {
-  '01': 'Jan',
-  '02': 'Feb',
-  '03': 'Mar',
-  '04': 'Apr',
-  '05': 'May',
-  '06': 'Jun',
-  '07': 'Jul',
-  '08': 'Aug',
-  '09': 'Sep',
-  '10': 'Oct',
-  '11': 'Nov',
-  '12': 'Dec',
-  1: 'Jan',
-  2: 'Feb',
-  3: 'Mar',
-  4: 'Apr',
-  5: 'May',
-  6: 'Jun',
-  7: 'Jul',
-  8: 'Aug',
-  9: 'Sep',
-};
-
+type Tab = (typeof tabs)[number];
 type User = {
   id: string;
   name: string;
 };
 
-export default function App(props: { notes: Note[]; user: User }) {
+type Props = { notes: Note[]; user: User; demo?: boolean };
+
+export default function App(props: Props) {
+  const demo = props.demo ?? false;
   const [notes, setNotes] = useState(props.notes);
-  const [currentTab, setCurrentTab] = useState(tabs[0]);
+  const [currentTab, setCurrentTab] = useState<Tab>(tabs[0]);
   const [search, setSearch] = useState('');
 
   useSync();
@@ -75,7 +52,7 @@ export default function App(props: { notes: Note[]; user: User }) {
   const dateBlocks = notes
     .map((n) => ({
       ...n,
-      lines: n.text.split('\n').map((l) => parseMdLine(l)),
+      lines: extractMdLines(n.text),
       tags: extractMdTags(n.text),
       mentions: extractMdMentions(n.text),
       habits: extractMdHabits(n.text),
@@ -118,6 +95,7 @@ export default function App(props: { notes: Note[]; user: User }) {
     // reset deleted note
     const existing = notes.find((n) => n.date === createDate);
     if (existing?.text === 'x') {
+      setCurrentTab('notes');
       setNotes((n) => n.map((note) => (note.id === existing.id ? { ...note, text: '' } : note)));
       return;
     }
@@ -172,40 +150,28 @@ export default function App(props: { notes: Note[]; user: User }) {
 
   return (
     <div class=" max-w-[1200px] mx-auto">
-      <header className="flex py-2 px-6 bg-slate-800 justify-between">
-        <span>Notesss</span>
-        <div className=" border border-white px-2 py-1 ">
-          <span className=" pr-2">?</span>
-          <input
-            name="q"
-            className=" bg-transparent text-white"
-            placeholder="search.."
-            value={search}
-            onInput={(e) => setSearch((e.target as HTMLInputElement)?.value)}
-          />
-        </div>
-        <a href="/logout">logout</a>
-      </header>
-
-      <aside className=" fixed z-10 right-0 bottom-0 top-[50px] w-18 pb-20">
-        <div className=" h-full p-3 flex flex-col justify-center gap-3">
-          {tabs.map((tab) => (
-            <button
-              className={' aspect-square text-xs p-[2px] ' + (tab === currentTab ? ' bg-white text-slate-800' : '')}
-              onClick={() => setCurrentTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-          <AddButton addNote={addNote} />
-        </div>
-      </aside>
+      {!demo && (
+        <header className="flex py-2 px-6 bg-slate-900 justify-between">
+          <span>Notesss</span>
+          <div className=" border border-white px-2 py-1 ">
+            <span className=" pr-2">?</span>
+            <input
+              name="q"
+              className=" bg-transparent text-white"
+              placeholder="search.."
+              value={search}
+              onInput={(e) => setSearch((e.target as HTMLInputElement)?.value)}
+            />
+          </div>
+          <a href="/logout">logout</a>
+        </header>
+      )}
 
       <main className="px-6 max-w-[70ch] mx-auto my-6 space-y-4 pb-10">
         {currentTab === 'notes' && (
           <>
-            <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} />
-            {!search && <Loader callback={loadMore} />}
+            <Notes blocks={dateBlocks} saveNote={saveNote} addNote={addNote} demo={demo} />
+            {!search && !demo && <Loader callback={loadMore} />}
           </>
         )}
         {currentTab === 'todos' && (
@@ -241,6 +207,30 @@ export default function App(props: { notes: Note[]; user: User }) {
           </div>
         )}
       </main>
+
+      <aside className=" fixed z-10 bottom-0 md:bottom-20 right-2 left-0 md:left-auto md:top-[50px] md:w-10 h-12 md:h-auto bg-slate-900 md:bg-transparent  py-1">
+        <div className=" h-full flex md:flex-col justify-center gap-2 md:gap-2 ">
+          {tabs.map((tab) => (
+            <button
+              className={
+                ' aspect-square text-xs p-[2px] flex justify-center items-center border-none rounded-md' +
+                (tab === currentTab ? ' bg-white text-slate-800' : ' bg-slate-800')
+              }
+              onClick={() => setCurrentTab(tab)}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                class={tab === currentTab ? ' fill-slate-800 ' : ' fill-white '}
+              >
+                <use href={`#${tab}`}></use>
+              </svg>
+            </button>
+          ))}
+          {!demo && <AddButton addNote={addNote} />}
+        </div>
+      </aside>
     </div>
   );
 }
@@ -277,28 +267,41 @@ const AddButton = ({ addNote }: { addNote: (date: string) => void }) => {
     addNote(date);
     setOpen(false);
   };
+
+  const step = (d: number) => {
+    const tomorrow = new Date(date);
+    tomorrow.setDate(tomorrow.getDate() + d);
+    setDate(tomorrow.toISOString().split('T')[0]);
+  };
   return (
-    <div className="relative ">
-      {!open && (
-        <button onClick={() => setOpen(true)} className=" w-full aspect-square text-xs p-[2px] ">
-          +
-        </button>
-      )}
+    <div className="relative aspect-square">
+      {/* {!open && ( */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="border-none rounded-md w-full aspect-square p-[2px]  bg-slate-800"
+      >
+        {open ? 'x' : '+'}
+      </button>
+      {/* )} */}
       {open && (
         <form onSubmit={onSubmit}>
-          <div className="absolute right-0  flex gap-2 z-20 ">
-            <div className="">
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate((e.target as HTMLInputElement)?.value)}
-                className=""
-              />
-            </div>
-            <button type="submit">+</button>
-            <button type="button" className=" size-8   " onClick={() => setOpen(false)}>
-              x
+          <div className="absolute flex gap-2 z-20 right-0 md:right-[calc(100%+8px)] bottom-[calc(100%+4px)] md:bottom-auto md:top-0 bg-slate-700 p-[6px] rounded-md">
+            <button className="text-xs" type="button" onClick={() => step(-1)}>
+              {'<'}
             </button>
+            <button className="text-xs" type="button" onClick={() => step(1)}>
+              {'>'}
+            </button>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate((e.target as HTMLInputElement)?.value)}
+              className=" bg-transparent w-32"
+            />
+            <button type="submit">+</button>
+            {/* <button type="button" className=" size-8   " onClick={() => setOpen(false)}>
+              x
+            </button> */}
           </div>
         </form>
       )}
@@ -310,10 +313,12 @@ const Notes = ({
   blocks,
   saveNote,
   addNote,
+  demo,
 }: {
   blocks: NoteBlock[];
   saveNote: (note: Note, newText: string) => void;
   addNote: (date: string) => void;
+  demo: boolean;
 }) => {
   const missingTodays = blocks.findIndex((n) => n.date === today) === -1;
 
@@ -328,7 +333,7 @@ const Notes = ({
 
   return (
     <>
-      {missingTodays && (
+      {missingTodays && !demo && (
         <div className="">
           <div>{today}</div>
           <button className=" border border-white" onClick={() => addNote(today)}>
@@ -351,8 +356,8 @@ const MonthBlock = ({ date, children }: { date: string; children: VNode | VNode[
   const [y, m] = date.split('-');
   return (
     <div key={y + m} className="month">
-      <h3 className=" text-xl text-right sticky top-0 z-10 py-2 bg-slate-900">
-        {months[m]} {y}
+      <h3 className=" text-xl text-right sticky top-0 z-10 py-2 bg-slate-950">
+        {months[m]} {y.slice(2)}
       </h3>
       <div className=" space-y-4">{children}</div>
     </div>
@@ -367,7 +372,8 @@ const getDayNth = (day: number) => {
   if (dig === 3) return 'rd';
   return 'th';
 };
-const NoteCard = ({
+
+export const NoteCard = ({
   datestr,
   children,
   showMonth = false,
@@ -383,7 +389,7 @@ const NoteCard = ({
   let col = d === 0 ? 7 : d;
   return (
     <div className=" card relative ">
-      <h3 className=" text-xl mb-1 sticky top-0 z-10 py-2 grid grid-cols-7 max-w-[500px] ">
+      <h3 className=" text-xl mb-1 sticky top-0 z-10 py-2 sm:grid sm:grid-cols-7 max-w-[500px]">
         <div style={{ gridColumnStart: col }}>
           <span className="mr-2">{weekday}</span>
           <span>{nth}</span>
@@ -391,7 +397,7 @@ const NoteCard = ({
         </div>
         {showMonth && <span className=" ml-4">{months[date.getMonth() + 1]}</span>}
       </h3>
-      <div className=" relative bg-slate-800 p-2 rounded-lg ">{children}</div>
+      <div className=" relative bg-slate-900 p-2 rounded-lg ">{children}</div>
     </div>
   );
 };
@@ -404,9 +410,11 @@ const Link = ({ note }: { note: NoteBlock }) => {
       <ul className="space-y-3 list-disc ml-6">
         {note.links.map((l) => (
           <li>
-            <a className="underline w-full flex " href={l.href} target="_blank" rel="noopener noreferrer">
-              <span className="capitalize">{l.text}</span> : &nbsp;&nbsp;&nbsp;
-              <span className=" flex-auto text-ellipsis">{l.href}</span>
+            <a href={l.href} target="_blank" rel="noopener noreferrer" class=" hover:underline">
+              <span className="x">{l.text}</span>
+              <span className="mt- block text-sm text-slate-400 flex-auto text-ellipsis whitespace-pre overflow-hidden">
+                {l.href}
+              </span>
             </a>
           </li>
         ))}
@@ -571,7 +579,7 @@ type MdxBlock = {
   items: MdxLine[];
 };
 
-const groupLineBlocks = (lines: MdxLine[]) => {
+export const groupLineBlocks = (lines: MdxLine[]) => {
   const blocks: MdxBlock[] = [];
 
   lines.forEach((line, l) => {

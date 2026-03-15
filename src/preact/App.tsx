@@ -145,7 +145,7 @@ export default function App(props: Props) {
 	const loadMore = async () => {
 		const oldest = notes[notes.length - 1]?.date;
 
-		const resp = await fetch(`/api/list?from=${oldest}`, {})
+		const resp = await fetch(`/api/list?from=${oldest}&maximum=14`, {})
 			.then((res) => res.json())
 			.catch(() => null);
 

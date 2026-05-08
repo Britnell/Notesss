@@ -17,7 +17,13 @@ export const GET: APIRoute = async ({ params, request }) => {
 	const session = await auth.api.getSession({ headers: request.headers });
 	if (!session || !from) return errResp;
 
-	const notes = await getRecentAfter(session.user.id, { from, to, maximum });
+	let notes = [];
+	try {
+		notes = await getRecentAfter(session.user.id, { from, to, maximum });
+		console.log(notes);
+	} catch (e) {
+		console.log(e);
+	}
 
 	const exported = notes
 		.map((note) => {
